@@ -1,4 +1,4 @@
 baseURL = 'https://yuvalmerhav.com/'
 languageCode = 'en-us'
-title = 'My New Hugo Site'
+title = 'Yuval Merhav - NLP, ML, Tech, Investing & More'
 theme = 'hugo-PaperMod'
