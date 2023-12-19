@@ -1,0 +1,66 @@
+# If your site is in 'https', then make sure your base url isn't written using 'http' otherwise your sitemap would
+# contain http (as opposeed to https) URLs. This would affect Google indexing of your URLs.
+baseURL: "https://yuvalmerhav.com"
+paginate: 100
+theme: [hugo-PaperMod]
+title: Yuval Merhav |ß AI, Tech, Investing & More
+enableInlineShortcodes: true
+enableRobotsTXT: true
+buildDrafts: false
+buildFuture: false
+buildExpired: false
+enableEmoji: true
+pygmentsUseClasses: true
+mainsections: ["posts", "papermod"]
+# googleAnalytics: UA-123-45
+
+minify:
+  disableXML: true
+  # minifyOutput: true
+
+  menu:
+    main:
+      - name: Archive
+        url: archives
+        weight: 5
+      - name: Search
+        url: search/
+        weight: 10
+      - name: Tags
+        url: tags/
+        weight: 10
+
+
+params:
+  env: production # to enable google analytics, opengraph, twitter-cards and schema.
+  description: "A blog by Yuval Merhav about AI (ML / NLP) Tech, Investing & More"
+  author: Yuval Merhav
+  defaultTheme: auto
+  # disableThemeToggle: true
+  ShowShareButtons: true
+  ShowReadingTime: true
+  # disableSpecial1stPost: true
+  displayFullLangName: true
+  ShowPostNavLinks: true
+  ShowBreadCrumbs: true
+  ShowCodeCopyButtons: true
+  ShowRssButtonInSectionTermList: true
+  ShowAllPagesInArchive: true
+  ShowPageNums: true
+  ShowToc: true
+  # comments: false
+  #images: ["images/papermod-cover.png"]
+
+  homeInfoParams:
+    Title: "Yuval Merhav"
+    Content: >
+      👋 Welcome! I'm Yuval. I asked ChatGPT to write a short humoristic bio. Here's what it came with: Yuval is the ML wizard at Portrait Analytics, where he works on search and applying LLMs for investing. He was formerly a 'Knowledge Graph Guru' at Twitter and a seasoned tech voyager. During his long tenure at Amazon as a Senior Applied Scientist, he juggled multilingual NLU and privacy for Alexa AI, including work on Alexa's Japan launch despite not knowing Japanese. Previously, he was a Principal Research Engineer at BasisTech, enhancing NLU capabilities. Yuval, earned his PhD from the Illinois Institute of Technology, also held research roles at The University of Alberta in Canada and ENS in Paris, France. When not advancing AI, he's likely playing soccer, claiming to make the world's best hummus, or relishing the great outdoors.
+      LinkedIn: https://www.linkedin.com/in/yuvalmerhav
+
+  socialIcons:
+    - name: Github
+      title: My Github
+      url: https://github.com/yuval
+    - name: Twitter
+      title: Follow me on X/Twitter
+      url: "https://twitter.com/yuvalmerhav"
