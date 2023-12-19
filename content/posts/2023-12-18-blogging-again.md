@@ -19,7 +19,7 @@ There are many platofrms that allow you to setup a blog/newsletter. Substack and
 5.  **Email subscription form:** Many options available. I went with ConvertKit that has a free version for up to 1000 subscribers. I created a form (Grow -> Landing pages & forms) and then added the js code snippet it created to my forked Papermod repo `layouts/_default/baseof.html`. You can check my Github as both the website code and the fork are public. 
 6. **Email Redirection and Update on ConvertKit:** Set up a custom email redirect (from contact@[my-domain] to my personal Gmail address) on CloudFlare and updated it on ConvertKit. This is not required but they recommend not using a free email like Gmail to send the subscription confirmation. 
 
-You should also add a config.yml file under the papermod theme repo. You can find a site example [here](https://github.com/adityatelange/hugo-PaperMod/tree/exampleSite).
+You should also add a config.yml file under the papermod theme repo. You can find a site example [here](https://github.com/adityatelange/hugo-PaperMod/tree/exampleSite). Another great site and one I learned a lot from is [Yanir Seroussi's blog](https://github.com/yanirs/yanirseroussi.com).
 
 So far I didn't need to pay anything besides acquiring the domain name. 
 
