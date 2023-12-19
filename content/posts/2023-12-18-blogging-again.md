@@ -17,7 +17,7 @@ There are many platofrms that allow you to setup a blog/newsletter. Substack and
 3. **Creating a New Blog with Hugo:** Followed their guide, it's very simple. The only difference is that I used my fork of the Papermod repo. 
 4. **Deploying with Render:** Followed [Render's guide](https://docs.render.com/docs/configure-cloudflare-dns) to set up deployment. While there are many options, including GitHub Pages, I've heard good things about Render and wanted to try it out.
 5.  **Email subscription form:** Many options available. I went with ConvertKit that has a free version for up to 1000 subscribers. I created a form (Grow -> Landing pages & forms) and then added the js code snippet it created to my forked Papermod repo `layouts/_default/baseof.html`. You can check my Github as both the website code and the fork are public. 
-6. **Email Redirection and Update on ConvertKit:** Set up a custom email redirect (from contact@<my-domain> to my personal Gmail address) on CloudFlare and updated it on ConvertKit. This is not required but they recommend not using a free email like Gmail to send the subscription confirmation. 
+6. **Email Redirection and Update on ConvertKit:** Set up a custom email redirect (from contact@[my-domain] to my personal Gmail address) on CloudFlare and updated it on ConvertKit. This is not required but they recommend not using a free email like Gmail to send the subscription confirmation. 
 
 You can find an example site here https://github.com/adityatelange/hugo-PaperMod/tree/exampleSite
 
