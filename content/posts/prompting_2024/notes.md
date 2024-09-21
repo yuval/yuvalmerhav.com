@@ -1,148 +1,115 @@
 
 Great tweet: https://x.com/_jasonwei/status/1712551642275655770
 
-Must read: https://reasonwithpal.com
+# Introduction: The Evolving Chain-of-thought
 
+There's no shortage of prompting techniques. Some are more widely adopted than others. In this post I focus on papers from the last year or so. Most of these paper focus on techniques that aim to improve upon the commonly used chain-of-thought (CoT) approach, especially for tasks requiring complex reasoning. It's not an exhaustive list or deep dive into each paper, but rather my summaries from paper I've been looking into recently. 
+
+As models become more sophisticated, one might wonder: Is prompt engineering still relevant? While newer models may have internalized many good prompting practices, there's still a vast ecosystem of models and tasks that benefit greatly from well-crafted prompts. 
+
+It's important to note that many of these papers used weaker LLMs than today's top closed models. As such, the specific results reported may not be directly reproducible so I put less emphasis on the results reported. 
+
+Before we dive in, let's recall a basic example of a Chain-of-Thought (CoT) exampler (or demonstartion):
 Chain-of-though paper: Chain-of-Thought Prompting Elicits Reasoning in Large Language Models
 https://proceedings.neurips.cc/paper_files/paper/2022/file/9d5609613524ecf4f15af0f7b31abca4-Paper-Conference.pdf
 
-"In particular, the widely used chain-of-thought (COT)
-method presents the model with the explicit intermediate
-steps that are required to reach the final answer. Then, the
-model is expected to apply a similar decomposition to the actual test example, and consecutively reach an accurate final
-answer"
+```
+Q: Take the last letters of the words in "Willie Valeria Zane" and concatenate them.
+A: Let's think step by step.
 
-"Wei et al. (2022) additionally augment each in-context example with chain of thought (COT) intermediate steps. Specifically, each in-context example in the COT setup is a triplet
-hxi
-, ti
-, yii, where xi and yi are input-output pair as before,
-and ti
-is a natural language description of the steps that are
-needed to arrive at the output yi from the input x"
-
-", their performance falls dramatically when dealing with complex arithmetic (Hendrycks et al., 2021; Madaan & Yazdanbakhsh,
-2022) or large numbers (Nogueira et al., 2021; Qian et al.,
-2022)."
-
-Scratchpads:
-Nye, M., Andreassen, A. J., Gur-Ari, G., Michalewski, H.,
-Austin, J., Bieber, D., Dohan, D., Lewkowycz, A., Bosma,
-M., Luan, D., Sutton, C., and Odena, A. Show your
-Work: Scratchpads for Intermediate Computation with
-Language Models. arXiv preprint arXiv:2112.00114,
-2021.
-
-Self consistency: "Multi-sample Generation As found by Wang et al.
-(2022b), chain-of-thought-style methods can be further improved by sampling k > 1 outputs, and selecting the final
-answer using majority voting. We thus repeated the greedydecoding experiments using nucleus sampling (Holtzman
-et al., 2019) with p = 0.95 and k = 40 as in Lewkowycz
-et al. (2022) and temperature of 0.7. As shown in Table 3,
-this further increases the accuracy of PAL from 72.0% to
-80.4% on GSM8K, obtaining 1.9% higher accuracy than
-Minerva-540B using the same number of samples."
-Self-Consistency Improves Chain of Thought Reasoning in Language Models.
-
-Here's a summary of a few papers published in the last year or so around prompting I've read recently. This is not an exhustive list by any means, nor a deep dive on any of the papers I'm covering here. 
-
-The general idea of these papers is that they try to improve the commonly used chain-of-thought (CoT) approach (aka let's think step by step), esp on tasks that require more complex reasoning.  One thing that is important to point right away is that the majority of these papers use weaker LLMs than today's top closed models, which means we wouldn't neccasrily be able to reproduce their results with stronger models. But nevertheless, they present simple ideas that can be useful for various use cases and models so it's worth knowing. I will try to provide at least one prompt example for each approach as it's the simplest way to understand the steps. This is why reading paper appendix sections (where all the prompt examples are) of today's NLP paper is sometime more useful that the main sections.
+The last letter of "Willie" is "e".
+The last letter of "Valeria" is "a".
+The last letter of "Zane" is "e".
+Concatenating them gives us: "eae".
+Therefore, the answer is eae.
+```
 
 # Let's Try Again Approaches 
 
-In this category we have approaches that generate more than one response at inference time. This is not to be confused with approaches that apply alternatives to the common greedy decoding at inference time (e.g., link). In particular, let's look into Self-Consistency and Self-Refine. 
+Sonnet 3.5 Intro:
+"Ever felt like you needed a do-over on a task? Well, these approaches give LLMs that chance. They're all about generating multiple responses at inference time, not to be confused with fancy decoding strategies. Let's check out two cool techniques: Self-Consistency and Self-Refine."
 
 ### Self Refine (Neurips 2023)
 
 Iterative Refinement with Self-Feedback https://proceedings.neurips.cc/paper_files/paper/2023/file/91edff07232fb1b55a505a9e9f6c0ff3-Paper-Conference.pdf
 Code: https://github.com/madaan/self-refine
 
-highly cited paper with GPT4 results. Few of the authors are the same. They seem to show better GPT4 improvements than the first paper. 
+Self-Refine is all about the LLM giving itself feedback. Here's the gist:
 
-They key to this strightforward  approach is a Feedback prompt that is guided only by instructions and few-shot examples. There's no model parameter updates like with RL. The method employs three key prompts: one for initial generation, one for feedback, and one for prompt refinement that is developed iterativley. Using a single LLM throughout, the process begins with a standard response generation. The LLM then provides feedback on its own output, which is used to refine the original prompt. This refined prompt generates a new response, with the history of previous iterations incorporated. Essentially, this method automates the iterative process typically performed manually by users.
+1. Generate an initial response (initial prompt)
+2. The LLM then critiques its own output (using a specific feedback prompt)
+3. Use that feedback to refine the original prompt 
+4. Generate a new, hopefully improved response
+5. Rinse and repeat
 
-This is one of the only paper that actually conducted experiments with GPT-4, showing performance gains across datasets, with Math Reasoning showing the least gains. They claim it's due to GPT-4's tendency to overestimate the correctness of its mathematical outputs. They also point notethat the most substantial improvements occur in the early iterations. This is important since runing many iterations is slow and expensive. Another important point is that the feedback prompt is task-specific, tailored to each individual task being performed. This tailoring, while beneficial, may lead to biased results if the prompt becomes overly attuned to the particular errors the LLM tends to make on the test set used.
+They key to this approach is a Feedback prompt that is guided only by instructions and few-shot examples. Using a single LLM throughout. The refined prompt incorporates the history of previous iterations. Essentially, this method automates the iterative prompt refinement typically performed manually by users.
 
-Let's see an example. One of the tasks in which they observed the highest gains compared to the base models is Constrained Generation, where the model is asked to generate a coherent sentence containing the input concepts given to it. This examples is based on few-shot prompting to guide model outputs, but they show that Self Refine works in zero-shot setups as well. 
+This is one of the only paper that actually conducted experiments with GPT-4, showing performance gains across datasets, with Math Reasoning showing the least gains. They claim it's due to GPT-4's tendency to overestimate the correctness of its mathematical outputs. They also point out that the most substantial improvements occur in the early iterations. This is important since runing many iterations is slow and expensive. Another important point is that the feedback prompt is task-specific, tailored to each individual task being performed. This tailoring, while beneficial, may lead to biased results if the prompt becomes overly attuned to the particular errors the LLM tends to make on the test set used.
 
-Let's say our initial prompt contains a few examplers for the LLM to understand the task:
+Let's see an example. One of the tasks in which they observed the highest gains compared to the base models is Constrained Generation, where the model is asked to generate a coherent sentence containing some input concepts given by the user. This example is based on few-shot prompting to guide model outputs, but they claim that Self Refine works in zero-shot setups as well. 
+
+Initial prompt:
 
 ```
+# Example 1
 Concepts: ['footage', 'motion', 'ruin', 'tilt', 'window']
-
 Sentence: time lapse footage with tilt up motion of the sun streaking through window of ruin
-
-###
-
+# Example 2
 Concepts: ['cause', 'hate', 'hut', 'local', 'love']
-
 Sentence: new beach huts on the island have caused some controversy some locals love them others hate them
 
-###
+Concepts: ['card', 'chip', 'deal', 'dealer', 'table']
 ```
 
-Then the feeback prompt targets generations with missing concepts:
+The feeback prompt targets generations with missing concepts:
 
 ```
 Concepts: ['beat', 'drum', 'pen', 'sit', 'use']
 Sentence: A man uses a drum to beat a pen.
 what concepts from the concept list are missing from the sentence?
-
 Feedback: sit
-
-###
 
 Concepts: ['chair', 'clipper', 'cut', 'hair', 'sit']
 Sentence: A girl sitting on the couch with her hair up.
 what concepts from the concept list are missing from the sentence?
-
 Feedback: clipper, cut, chair
-
-###
-
-Concepts: ['grass', 'hose', 'spray', 'stand', 'water']
-Sentence: A man standing next to a water dripping out of the grass.
-what concepts from the concept list are missing from the sentence?
-
-Feedback: hose, spray
 ```
 
-Now, given a new concept list, the iterative approach could look like the following:
+Here's the refined prompt after two iterations of generation + feedback:
 
 ```
-###
+# Examples ...
+
+Concepts: ['card', 'chip', 'deal', 'dealer', 'table']
+Sentence: a dealer offers a card to a group of people at a table  # First response
+
+# Feedback step:
 
 Concepts: ['card', 'chip', 'deal', 'dealer', 'table']
 Sentence: a dealer offers a card to a group of people at a table
 what concepts from the concept list are missing from the sentence?
-
-Feedback: chip, deal
+Feedback: chip, deal  # The first feedback response
 
 Okay, impove the sentence using the sentence:
 
-Sentence: The dealer dealt each person at the table and offered them a card.
+Sentence: The dealer dealt each person at the table and offered them a card.  
 what concepts from the concept list are missing from the sentence?
-
-Feedback: chip
+Feedback: chip  # The second feedback response
 
 Okay, impove the sentence using the sentence:
 
 Sentence: The dealer dealt each person at the table a chip and offered them a card.
 what concepts from the concept list are missing from the sentence?
-
-Feedback: NONE
-
-###
+Feedback: NONE  # # The third feedback response
 ```
 
 In this example, the first response was `a dealer offers a card to a group of people at a table` and after a couple of iterations we ended up with an improved version `The dealer dealt each person at the table a chip and offered them a card.`.
 
 ### Is the Feedback/Refinment step important?
 
-Can we just generate multiple outputs instead of refining using feedback? The authors ran an experiment to validate this. 
-They used the LLM to generate 4 samples (without any feedback and refinment) and asked humans to annotate if a single reponse generated by Self-Refine is better than *all* 4 samples genreated. They reported scores only for two tasks - acronym generation and sentiment reversal. Their results clearly show that humans preferred the Self-Refine generations more often. However, they don't mention how they generated the multiple samples. It seems they used ChatGPT so I'm assuming they just ran it 4 times per input, rather then trying a more common sampling approach. Also, based on Figure 7 in the paper, it seems that ChatGPT with a single reponse performed better than this multi-sample approach on this experiment. Experimental setup matters. 
+Can we just generate multiple outputs instead of refining using feedback? The authors ran an experiment to validate this. They used the LLM to generate 4 samples (without any feedback and refinment) and asked humans to annotate if a single reponse generated by Self-Refine is better than *all* 4 samples genreated. They reported scores only for two tasks - acronym generation and sentiment reversal. Their results clearly show that humans preferred the Self-Refine generations more often. However, they don't mention how they generated the multiple samples. It seems they used ChatGPT so I'm assuming they just ran it 4 times per input, rather then trying a more common sampling approach. Also, based on Figure 7 in the paper, it seems that ChatGPT with a single reponse performed better than this multi-sample approach on this experiment. Experimental setup matters. 
 
 This experiment is actually a good segway to the next paper. 
-
-Some relevant related work: Reflexion (Shinn et al., 2023) and Self-Correction (Welleck et al., 2022). 
 
 
 ### Self Consistency (ICLR 2023)
@@ -151,47 +118,60 @@ REASONING IN LANGUAGE MODELS
 https://arxiv.org/pdf/2203.11171
 Code: 
 
-"We propose a new decoding strategy, self-consistency, to replace the naive greedy decoding used in chain-of-thought prompting."
-I like how the authors refer to this approach: "it acts more like a “self-ensemble” that works on top of a single language model." 
+The authors nicely refer to this appraoch as "it acts more like a “self-ensemble” that works on top of a single language model".  
 
-We start with a prompt with a set of manually written chain-of-thought exemplars. Then instead of a single response generation using greedy decoding, we generate multiple responsse by using different sampling techiques (e.g., temprature scaling). Finally, we apply majority vote to pick the most “consistent” answer. Note that generations are not identical so they employ a task dependent parser to extract the answer from each generated response. For example, for arithmetic reasoning, they parse the ﬁrst numerical part as the ﬁnal answer after the model generates “The answer is ". This way they can pick the answer that is most common in all generations. 
+1. Start with a prompt containing some manually written chain-of-thought examples.
+2. Instead of generating just one response, we ask for several using different sampling techniques (like temperature sampling).
+3. Finally, we use majority voting to pick the most "consistent" answer. (there's a task specific parser to extrat the answer from each response such as parsing the first numerical part after the model generates “The answer is ")
 
-How they sample? Some combination od temperature sampling (e.g., T = 0.5) and truncated at the top-k (e.g., k = 40) tokens with the highest probability. For GPT-3 they used T = 0.7 without top-k truncation.  They did an ablation study and concluded that self-consistency is generally robust to sampling strategies and parameters.
-
-They show that you can get performance gains with 5-10 samples, but sampling a higher number (e.g., 40) of reasoning paths leads to a consistently better performance. This is the main limitation of this approach as generating 40 outputs is not very practical. 
+There are different sampling techniques to try. They did an ablation study and concluded that self-consistency is generally robust to sampling strategies and parameters.
 
 Importantly, they also showed that self consistency works better than beam search decoding with the same number of beams. Their explanation is that self consistency with sampling generates more diverse samples than beam search. 
 
+Limitation - while they showed gains with 5-10 samples, the best results come from using around 40 samples. That's a lot of generations, which can get pretty expensive and slow. Not very practical.
 
-Improves performance but too inefficent. 
-"We leverage self-consistency (SC) decoding to understand the
-upper bound of our method. This sampling-based decoding algorithm can greatly reduce randomness in
-the generation procedure and boosts performance. Specifically, we set a temperature of 0.4 and K=40
-throughout our experiments"
+ I've seen many papers apply self consistency with their approach to improve results further. It seems widely known but maybe not widely adopted in practice. 
 
-More examplers usually improve diversity and more consistent outputs. 
+Some relevant related work: Reflexion (Shinn et al., 2023) and Self-Correction (Welleck et al., 2022). 
 
-# Adaptive Prompting
+
+## Active Prompting
 
 ## Paper: Active Prompting with Chain-of-Thought for Large Language Models (ACL 2024)
 ### Github: https://github.com/shizhediao/active-prompt
 
-If you wrote a prompt with few-shot CoT you know that coming with examples is not always trivial. You want good examples that will improve the model performance. A common approach is to detect errors that LLM makes and then add those errors to the prompt as examples (a typical ML workflow). This paper automates this step, inspired by active learning in more traditional ML. It applies uncertanity estimation to pick the best examples out of all possible candidates. The approach is really simple - run every example/task though the LLM multiple times and pick those examples where the LLM seems to be inconsistent on with its answer. Then annotate those examples and include them in the prompt. This is nice cause you don't need to have labels in order to find examples where the LLM struggles with, and the extra compute is done "offline" to generate the best prompt, not at inference time like self consistency.
+Sonnet 3.5 Intro:
+"Ever tried to come up with perfect examples for few-shot Chain-of-Thought prompts? It's not as easy as it sounds, right? You want examples that'll really boost the model's performance, but finding them can be a head-scratcher. Well, some clever folks have been working on automating this process, and it's pretty cool stuff."
 
-How is uncertanity esimtated? They experiment with Disagreemnt (D) and Entropy (E) based. approaches. 
+Writing CoT examples isn't always easy. You want good examples that will improve the model performance. Like examples that the LLM doesn't handle well yet. This paper automates this step, inspired by active learning from more traditional ML. Here's how it works:
+1. Run each example or task through the LLM multiple times.
+2. Look for examples where the LLM gives inconsistent answers. (uncertanity estimation step)
+3. Annotate these examples and add them to your prompt.
 
-# https://reasonwithpal.com
+This is nice because you don't need to have labels in order to find examples where the LLM struggles with, and all the extra computation is done offline to build the prompt. 
 
-Next. PAL: Program-aided Language Models.
+How is uncertanity esimtated? They experiment with different approaches and Disagreemnt and Entropy consistently showed the best performance. Disagreemnt is simple, it's based on the number of unique answers generated by the model across multiple runs, divided by the total number of runs. Entropy is similar but it also considers that distribution of the unique answers. Two unique answers distributed equally in 10 samples would have a higher entropy (higher uncertanity) than two unique answers with 9/10 samples the same (Disagreement would be the same for both cases).    
+
+They also tried using the model's self confidence (asking the model to evaluate its own confidence in its answer). They found it performed poorly as the model tends to be too confident in its generation. A better approach was to use the model's log probaiblities but that is not always available. 
+
+Extra read: Auto-CoT that also aims to improve examplers diversity automatically. It samples questions with diversity and generates reasoning chains to construct CoT examplers. It takes it a step further as it alo annotate the exampler unlike in the adaptive prompt work.  
+"Automatic chain of thought prompting in large language models"
+
+## From natural language to code
+
+There has been a lot of work on code generation from natural lanauge using LLMs, like SQL, Python, etc. Two papers with that came out about the same time follow this paradigm to help with various tasks.  
+
+### Program of Thoughts
 Program of Thoughts Prompting: Disentangling Computation from Reasoning for Numerical Reasoning Tasks
+https://reasonwithpal.com
 Github: https://github.com/TIGER-AI-Lab/Program-of-Thoughts
 
-Two papers with similar ideas that came out about the same time. Let's start with program-of-thoughts.
+For tasks that require numerical computation, the idea is to let the LLM do the reasoning and language understanding, and delegate the actual computation to a generated program. The motivation for this is that LLMs are prone to arithmetic calculation erros, and struggle wtih complex computations, but are good at generating code. An LLM with a calculator as a tool is an example of a way to solve tasks that require simple arthmetics. 
+Works in this area mostly differ is in their intermidate representation, which could be a set of equations, Python code, pseudo code, etc. 
 
-First, this is cool work. For tasks that require numerical computation, the idea is to let the LLM do the reasoning and language understanding, and delegate the actual computation to a generated program. It makes sense since we know that LLMs are good at generating code and weak at LLMs prone to arithmetic calculation erros, not to mention complex computations.  In my field we tackle math-driven financial questions so this is of personal interest. 
 
-"We evaluate PoT prompting across five MWP datasets, GSM8K, AQuA, SVAMP, TabMWP, MultiArith; and three financial datasets, FinQA, ConvFinQA, and TATQA.". THe usual GSM8K etc but also FinQA which is cool. 
 
+<!-- 
 They stress out that PoT is not similar to equations generation:
 "
 The ‘program of thoughts’ is different from generating equations directly, where the generation target would
@@ -236,7 +216,6 @@ They claim to be better than PaL:
 et al., 2022). According to to Table 5, we found that our method is in general better than PaL, especially
 on SVAMP and ASDIV. Our results are 6% higher than their prompting method."
 
-Their ablaation study shows that PoT helps more on the more challenging problems in the categories such as ‘linear/polynomial equation’, ‘iterative’, ‘symbolic’, and ‘combinatorics’. But less so on arithmetic for example. 
 
 This means that for simple arthimetic CoT with calc is probably good enough. 
 
@@ -260,14 +239,25 @@ grounding problems in real-world scenarios."
 Limitations: You don't want the LLM to execute some crazy code like  ‘import os; os.rmdir()’... Need to block it from doing something stupid.
 "Another limitation is
 that PoT still struggles with AQuA dataset with complex algebraic questions with only 58% accuracy. It’s
-mainly due to the diversity questions in AQuA, which the demonstration cannot possibly cover."
+mainly due to the diversity questions in AQuA, which the demonstration cannot possibly cover." -->
 
-OK, let's see how an example prompt looks like. 
-
-Example:
+This work doesn't use a specific programming language. It breaks the problem into a multi-step ‘thought’ process and binds semantic meanings to variables to help ground the model in language. Let's see how it works for a typical math word problem. 
 
 ```
-Ques%on: Josh decides to try flipping a house. He buys a house for $80,000 and then puts in $50,000 in repairs.
+Josh decides to try flipping a house. He buys a house for $80,000 and then puts in $50,000 in repairs.
+This increased the value of the house by 150%. How much profit did he make?
+```
+
+Note that GPT-4o (as of Sep 20, 2024) struggles with this question and answers it incorrectly. It fails to generate the correct equations. In a typical chain-of-thought reasining the demonstartion would like something like this:
+
+```
+Let's break it down step by step. Josh bought the house for $80,000. He spent $50,000 on repairs. This means that his Total investment is $80,000 + $50,000 = $130,000...
+```
+
+As you can see, the LLM does everything, including the calculations. In program of thoughts:
+
+```
+Question: Josh decides to try flipping a house. He buys a house for $80,000 and then puts in $50,000 in repairs.
 This increased the value of the house by 150%. How much profit did he make?
 # Python code, return ans
 cost_of_original_house = 80000
@@ -277,180 +267,18 @@ cost_of_repair = 50000
 ans = value_of_house - cost_of_repair - cost_of_original_house
 ```
 
-As you can see, the syntax of their language relis to variables. They talk about it in the paper, why it works better. 
-
-First, let's see how GPT-4o answered this: include image. 
-
-```
-To calculate Josh's profit:
-
-1. **Initial Cost**: $80,000 (purchase) + $50,000 (repairs) = $130,000 (total investment).
-  
-2. **Increased Value**: The house's value increases by 150%, so the new value is:
-   \[
-   130,000 \times 2.5 = 325,000
-   \]
-   
-3. **Profit**: The profit is the new value minus the total investment:
-   \[
-   325,000 - 130,000 = 195,000
-   \]
-
-Josh made a profit of **$195,000**.
-```
-
-Sonnet 3.5 nailed it:
-
-```
-Let's approach this problem step-by-step:
-
-1. Calculate the total investment:
-   Purchase price + Repairs = $80,000 + $50,000 = $130,000
-
-2. Calculate the new value of the house:
-   • The value increased by 150% of the purchase price
-   • 150% of $80,000 = $80,000 × 1.5 = $120,000
-   • New value = Purchase price + Increase in value
-   • New value = $80,000 + $120,000 = $200,000
-
-3. Calculate the profit:
-   Profit = New value - Total investment
-   Profit = $200,000 - $130,000 = $70,000
-
-Therefore, Josh made a profit of $70,000 on this house flip.
-```
-
-I'm not sure why but they have another prompt that has python code:
-
-```
-# Write Python Code to solve the following ques7ons. Store your result as a variable named 'ans'.
-from sympy import Symbol
-from sympy import simplify
-import math
-from sympy import solve_it
-# solve_it(equa7ons, variable): solving the equa7ons and return the variable value.
-
-# Ques7on: In a flight of 600 km, an aircraK was slowed down due to bad weather. Its average speed for
-the trip was reduced by 200 km/hr and the 7me of flight increased by 30 minutes. The dura7on of the
-flight is:
-# Answer op7on: ['A)1 hour', 'B)2 hours', 'C)3 hours', 'D)4 hours', 'E)5 hours']
-dura7on = Symbol('dura7on', posi7ve=True)
-delay = 30 / 60
-total_disntace = 600
-original_speed = total_disntace / dura7on
-reduced_speed = total_disntace / (dura7on + delay)
-solu7on = solve_it(original_speed - reduced_speed - 200, dura7on)
-ans = solu7on[dura7on]
-```
-
-I think the first prompt is from GSK8 while this one is from the more challenging dataset where they actually used PoT as an intermiddate step. 
+Then the solve the program using the SymPy library https://www.sympy.org/en/index.html. 
+This is the general idea. You can desing more complex demonstartions where the program as an intermidate step. 
 
 
-The code interpreter tool that you use can do different things. Execute the code, 
-Can also use loops etc:
+### PAL: Program-aided Language Models.
 
-Question: Carlos is planting a lemon tree. The tree will cost $90 to plant. Each year it will grow 7 lemons, which he can sell for $1.5 each. It costs $3 a year to water and feed the tree. How many years will it tak
-e before he starts earning money on the lemon tree?
-# Python code, return ans
-total_cost = 90
-cost_of_watering_and_feeding = 3
-cost_of_each_lemon = 1.5
-num_of_lemon_per_year = 7
-ans = 0
-while total_cost > 0:
-    total_cost += cost_of_watering_and_feeding
-    total_cost -= num_of_lemon_per_year * cost_of_each_lemon
-    ans += 1
-
-# Question: Find out which of the following values is the multiple of X, if it is divisible by 9 and 12?
-# Answer option: ['A)36', 'B)15', 'C)17', 'D)5', 'E)7']
-options = [36, 15, 17, 5, 7]
-for option in options:
-    if option % 9 == 0 and option % 12 == 0:
-        ans = option
-        break
-Some of their prompts have this format:
-
-# Write Python Code to solve the following questions. Store your result as a variable named 'ans'.from sympy import Symbolfrom sympy import simplifyimport mathfrom sympy import solve_it# solve_it(equations, variable): solving the equations and return the variable value.
-# Question: In a flight of 600 km, an aircraft was slowed down due to bad weather. Its average speed for the trip was reduced by 200 km/hr and the time of flight increased by 30 minutes. The duration of the flight is:# Answer option: ['A)1 hour', 'B)2 hours', 'C)3 hours', 'D)4 hours', 'E)5 hours']duration = Symbol('duration', positive=True)delay = 30 / 60total_disntace = 600original_speed = total_disntace / durationreduced_speed = total_disntace / (duration + delay)solution = solve_it(original_speed - reduced_speed - 200, duration)ans = solution[duration]
-ANother format:
-
-Read the following text and table, and then write code to answer a question:the chart shows that the firm posted market risk 2013related gains on 248 out of 261 days in this period , with 12 days exceeding $ 210 million .december 31 ( in millions ) | 1 basis point increase in jpmorgan chase 2019s credit spread2010 | $ 352009 | $ 39Question: on what percent of trading days were there market gains above $ 210 million?#Pythondays_with_market_gains_above_210_million = 12total_trading_days = 261percent_days_with_market_gains_above_210_million = days_with_market_gains_above_210_million / total_trading_daysans = percent_days_with_market_gains_above_210_million
-
-# BINDING LANGUAGE MODELS IN SYMBOLIC LANGUAGES
-https://github.com/xlang-ai/Binder
-ICLR 2023
-https://arxiv.org/pdf/2210.02875
-
-
-
-
-
-# PAL
-
-Very similar but generates valid python code. 
-"In this paper, we propose Program-Aided Language
-model (PAL): a novel method that uses an LLM to read
-natural language problems and generate programs as reasoning steps, but offloads the solution step to a Python interpreter"
-
-"This work focuses on COT-style reasoning chain, but in
-Appendix I we show that PAL also improves Least-toMost (Zhou et al., 2022) prompts, which introduce reasoning chains that decompose a question into sub-questions"
+Very similar to PoT but generates valid python code. The LLM generates a python program as its reasining step and offloads the solution to a python interpreter. They also focus on CoT-style reasoning chains. LLMs knwo Python well so python is a more preferable representation. 
 
 Nice experiment they did is putting the answers in the prompt to test if the LLM can actually replace the interperter. They found that results dropped signficantly. Which shows the improvement is not just from the new prompt style. Also, they found that meaningful variable names are important than using random names, as you might expect. 
 
-Calculator tool citation: "For example, Cobbe et al. (2021) employ a calculator for arithmetic operations as a post hoc processing". "Unlike these works, PAL generates code
-for a Python interpreter, which is general enough to handle
-both arithmetic calculations and dates, without specialized
-modules and ad-hoc fixes"
-Cobbe, K., Kosaraju, V., Bavarian, M., Hilton, J., Nakano,
-R., Hesse, C., and Schulman, J. Training Verifiers to Solve Math Word Problems. arXiv preprint
-arXiv:2110.14168, 2021.
 
-"Further, LMs that
-were pretrained on Python are abundant compared to other
-domain-specific languages, making Python code a much
-more preferable representation" - they say previous works did semantic parsing where they constrain the decoder
-using things like Context-Free Grammar (CFG).
-
-!! " The closest work to ours technically may be Binder (Cheng et al.,
-2022), but it addressed mostly answering questions about
-tables using SQL and SQL-like Python."
-
-Prompt examples:
-
-```
-"""Q: Here is a table where the first line is a header and each subsequent line is a
-penguin: name, age, height (cm), weight (kg) Louis, 7, 50, 11 Bernard, 5, 80, 13
-Vincent, 9, 60, 11 Gwen, 8, 70, 15 For example: the age of Louis is 7, the weight
-of Gwen is 15 kg, the height of Bernard is 80 cm. We now add a penguin to the
-table: James, 12, 90, 12
-How many penguins are less than 8 years old?
-"""
-# Put the penguins into a list.
-penguins = []
-penguins.append(('Louis', 7, 50, 11))
-penguins.append(('Bernard', 5, 80, 13))
-penguins.append(('Vincent', 9, 60, 11))
-penguins.append(('Gwen', 8, 70, 15))
-# Add penguin James.
-penguins.append(('James', 12, 90, 12))
-# Find penguins under 8 years old.
-penguins_under_8_years_old = [penguin for penguin in penguins if penguin[1] < 8]
-# Count number of perguins under 8.
-num_penguin_under_8 = len(penguins_under_8_years_old)
-answer = num_penguin_under_8
-```
-
-```
-# Q: 2015 is coming in 36 hours. What is the date one week from today in MM/DD/YYYY?
-# If 2015 is coming in 36 hours, then today is 36 hours before.
-today = datetime(2015, 1, 1) - relativedelta(hours=36)
-# One week from today,
-one_week_from_today = today + relativedelta(weeks=1)
-# The answer formatted with %m/%d/%Y is
-one_week_from_today.strftime('%m/%d/%Y')
-```
-
+Prompt example.
 
 ```
 # Q: I have a chair, two potatoes, a cauliflower, a lettuce head, two tables, a
@@ -466,31 +294,14 @@ vegetables_to_count = {
 print(sum(vegetables_to_count.values()))
 ```
 
-```
-Q: There were nine computers in the server room. Five more computers were installed each day, from monday to thursday. How many computers are now in the server room?
 
-# solution in Python:
-
-
-def solution():
-    """There were nine computers in the server room. Five more computers were installed each day, from monday to thursday. How many computers are now in the server room?"""
-    computers_initial = 9
-    computers_per_day = 5
-    num_days = 4  # 4 days between monday and thursday
-    computers_added = computers_per_day * num_days
-    computers_total = computers_initial + computers_added
-    result = computers_total
-    return result
-```
+Related work: BINDING LANGUAGE MODELS IN SYMBOLIC LANGUAGES
+https://github.com/xlang-ai/Binder
+ICLR 2023
+https://arxiv.org/pdf/2210.02875
 
 
-
-
-
-
-
-
-
+## 
 
 # In-Context Principle Learning from Mistakes (LEAP)
 
@@ -498,11 +309,11 @@ This work actually used gpt-4 which is nice.
 
 This is another nice approach that helps automate the process of writing useful instructions in the prompt (“principles”). We all wrote or saw prompts with many lines of instrctions, DOs and DON'Ts, etc. The high-level LEAP (Learning Principles) approach goes like this:
 
-- Run the LLM in zero-shot CoT fashion multiple times on some questions you have gold answers 
+- Run the LLM in zero-shot CoT fashion multiple times on some questions you have gold answers for
 - Ask the LLM to evaluate answers against the gold 
 - For each mistake, ask the LLM to generate low-level principles
 - Generate high-level principles from the low-level principles
-- Create enhanced promp with the low-level and/or high-level principles, with optional few-shot examples (recommended). This is the prompt to be used to label new unseen examples. 
+- Create an enhanced prompt with the low-level and/or high-level principles, with optional few-shot examples (recommended). This is the prompt to be used to label new unseen examples. 
 
 Low-level prompt:
 ```
@@ -571,6 +382,8 @@ Which principles provide more value?  "We could not identify any particular patt
 method should be used. We thus
 suggest that in real-life scenarios, both approaches should
 be tested, and selected using a validation set"
+
+## Plan and Solve One by One Approaches
 
 # least-to-most prompting (Zhou et al., 2022) 
 
@@ -749,3 +562,6 @@ output_file = os.path.join(folder_path, 'HOV-queries.jsonl')
 convert_json_files_to_jsonl(folder_path, output_file)
 
 ```
+# Framework
+
+Dspy. 
