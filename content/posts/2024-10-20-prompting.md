@@ -235,7 +235,7 @@ The main limitation is obvious. You need to make multiple LLM calls sequntially.
 
 The following image from the paper explains this approach best. 
 
-{{<figure src="least-to-prompt.png" alt="least-to-most-prompting">}}
+{{<figure src="/prompting_2024/least-to-prompt.png" alt="least-to-most-prompting">}}
 
 
 While this apporach makes a lot of sense as it's just like how humans solve complex problems, it's worth noting that their results show that there are two iportant considerations to make: 1. How trivial is to decompose the task; and 2. How many steps are needed to solve the problem. They show for example that on the GSM8K dataset, least-to-prompt significantly improves on CoT only on questions that require at least 5 reasoning steps. It kinda makes sense. Think of the problem of last-letter concatenation. If the inputs has 2-3 words, one pass with CoT is likely to suffice. But for 10 words, the LLM is likely to get lost somehwere in the middle. Decomposing the problem to 10 sub-problems is expensive but likely lead to the right solution. (they actually reported 100% accuracy on this task)
@@ -248,7 +248,7 @@ This work is similar to least-to-most prompting but focusing on zeroshot CoT. Th
 
 Let's see an example. Coin Flip is a toy symbolic reasoning reasining task introduced in the original CoT paper. This task asks the model to answer whether a coin is still heads up after people either flip or don’t flip the coin (e.g., “A coin is heads up. Phoebe flips the coin. Osvaldo does not flip the coin. Is the coin still heads up?” → “no”). The following table from the paper shows how adjustments to the prompt can have a significant impact on the results.(`text-davinci-003` is an older openai model from the GPT-3 family, not competitive today)
 
-{{<figure src="pos-coin-flip.png" alt="plan-and-solve-coin-flip">}}
+{{<figure src="/prompting_2024/pos-coin-flip.png" alt="plan-and-solve-coin-flip">}}
 
 # Prompting Frameworks
 A framework that implements common prompting techniques and simplifies experimentation with different ones would be really helpful. If you're aware of any good options, do let me know! I haven't had much time to explore frameworks in depth. I briefly checked out [DSPY](https://github.com/stanfordnlp/dspy) (looks overkill for what I need) and [ELL](https://github.com/MadcowD/ell), which treat prompts as programs (I like the concept), and [PromptHub](https://www.prompthub.us) (no affiliation, but they kindly gave me a free access code).
