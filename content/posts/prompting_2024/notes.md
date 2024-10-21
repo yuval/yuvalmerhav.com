@@ -1,16 +1,15 @@
 +++
 title = 'Beyond Chain-of-Thought: Evolving Prompts for Enhanced LLM Reasoning'
-date = 2024-09-24
-draft = true
+date = 2024-10-20
+draft = false
 +++
 
 # Introduction: The Evolving Chain-of-thought
 
-There's no shortage of prompting techniques. Some are more widely adopted than others. In this post I focus on papers from the last year or two. Most of these papers focus on techniques that aim to improve upon the commonly used [chain-of-thought](https://proceedings.neurips.cc/paper_files/paper/2022/file/9d5609613524ecf4f15af0f7b31abca4-Paper-Conference.pdf) (CoT) approach, especially for tasks requiring complex reasoning. It's not an exhaustive list or deep dive into each paper, but rather my summaries of papers I've been looking into recently. 
+There's no shortage of prompting techniques. Some are more widely adopted than others. In this post I focus on peer-reviewed papers from the last year or two. Most of these papers focus on techniques that aim to improve upon the commonly used [chain-of-thought](https://proceedings.neurips.cc/paper_files/paper/2022/file/9d5609613524ecf4f15af0f7b31abca4-Paper-Conference.pdf) (CoT) approach, especially for tasks requiring complex reasoning. It's not an exhaustive list or deep dive into each paper, but rather my summaries of papers I've been looking into recently. It's worth noting that many of these papers use weaker LLMs than today's top closed models. As such, I put less emphasis on the results reported (which is often hard to reproduce anyway). In addition, many benchmarks are not that reflective of real world usage, which is why often doing well on these benchmarks doesn't mean the model is actually good.  
 
-As models become more sophisticated (o1-preview, I'm talking to you), one might wonder: How relevant is prompt engineering today? While newer models may have internalized many good prompting practices, there's still a vast ecosystem of models and tasks that benefit greatly from well-crafted prompts. AI is evolving fast and so is prompt engineering. 
+As models become more sophisticated, one might wonder how relevant is prompt engineering today? While newer models may have internalized many good prompting practices, there's still a vast ecosystem of models and tasks that benefit greatly from well-crafted prompts. 
 
-It's important to note that many of these papers used weaker LLMs than today's top closed models. As such, I put less emphasis on the results reported. 
 
 Before we dive in, let's recall a basic example of a CoT demonstartion:
 
@@ -40,9 +39,9 @@ Self-Refine is all about the LLM giving itself feedback. Here's the gist:
 4. Generate a new, hopefully improved response
 5. Rinse and repeat
 
-They key to this approach is a Feedback prompt that is guided only by instructions and few-shot examples. Using a single LLM throughout. The refined prompt incorporates the history of previous iterations. Essentially, this method automates the iterative prompt refinement typically performed manually by users.
+The key to this approach is a Feedback prompt that is guided only by instructions and few-shot examples, using a single LLM throughout. The refined prompt incorporates the history of previous iterations. Essentially, this method automates the iterative prompt refinement typically performed manually by users.
 
-This is one of the only paper that actually conducted experiments with GPT-4, showing performance gains across datasets, with Math Reasoning showing the least gains. They claim it's due to GPT-4's tendency to overestimate the correctness of its mathematical outputs. They also point out that the most substantial improvements occur in the early iterations. This is important since runing many iterations is slow and expensive. Another important point is that the feedback prompt is task-specific, tailored to each individual task being performed. This tailoring, while beneficial, may lead to biased results if the prompt becomes overly attuned to the particular errors the LLM tends to make on the test set used.
+This is one of the only papers that actually conducted experiments with GPT-4, showing performance gains across datasets, with Math Reasoning showing the least gains. They claim it's due to GPT-4's tendency to overestimate the correctness of its mathematical outputs. They also point out that the most substantial improvements occur in the early iterations. This is important since runing many iterations is slow and expensive if done at runtime. Another important point is that the feedback prompt is task-specific, tailored to each individual task being performed. This tailoring, while beneficial, may lead to biased results if the prompt becomes overly attuned to the particular errors the LLM tends to make on the test set used.
 
 Let's see an example. One of the tasks in which they observed the highest gains compared to the base models is Constrained Generation, where the model is asked to generate a coherent sentence containing some input concepts given by the user. This example is based on few-shot prompting to guide model outputs, but they claim that Self Refine works in zero-shot setups as well. 
 
@@ -105,31 +104,29 @@ In this example, the first response was `a dealer offers a card to a group of pe
 
 ### Is the Feedback/Refinment step important?
 
-Can we just generate multiple outputs instead of refining using feedback? The authors ran an experiment to validate this. They used the LLM to generate 4 samples (without any feedback and refinment) and asked humans to annotate if a single reponse generated by Self-Refine is better than *all* 4 samples genreated. They reported scores only for two tasks - acronym generation and sentiment reversal. Their results clearly show that humans preferred the Self-Refine generations more often. However, they don't mention how they generated the multiple samples. It seems they used ChatGPT so I'm assuming they just ran it 4 times per input, rather then trying a more common sampling approach. Also, based on Figure 7 in the paper, it seems that ChatGPT with a single reponse performed better than this multi-sample approach on this experiment. Experimental setup matters. 
+Can we just generate multiple outputs instead of refining using feedback? The authors ran an experiment to validate this. They used the LLM to generate 4 samples (without any feedback and refinment) and asked humans to annotate if a single reponse generated by Self-Refine is better than *all* 4 samples genreated. They reported scores only for two tasks - acronym generation and sentiment reversal. Their results clearly show that humans preferred the Self-Refine generations more often. However, they don't mention how they generated the multiple samples. It seems they used ChatGPT so I'm assuming they just ran it four times per input, rather then trying a more common sampling approach. Also, based on Figure 7 in the paper, it seems that ChatGPT with a single reponse performed better than this multi-sample approach on this experiment. Experimental setup matters and it seems they overlooked this one.   
 
 This experiment is actually a good segway to the next paper. 
 
 ## Self Consistency (ICLR 2023)
 Paper: [Self-Consistency Improves Chain of Thought Reasoning in Language Models](https://arxiv.org/pdf/2203.11171)
-
 Code: N/A
 
 The authors nicely refer to this appraoch as "it acts more like a “self-ensemble” that works on top of a single language model".  
 
 1. Start with a prompt containing some manually written chain-of-thought examples.
 2. Instead of generating just one response, we ask for several using different sampling techniques (like temperature sampling).
-3. Finally, we use majority voting to pick the most "consistent" answer. (there's a task specific parser to extrat the answer from each response such as parsing the first numerical part after the model generates “The answer is ")
+3. Finally, we use majority voting to pick the most "consistent" answer. (there's a task specific parser to extrat the answer from each response, such as parsing the first numerical part after the model generates “The answer is ")
 
 There are different sampling techniques to try. They did an ablation study and concluded that self-consistency is generally robust to sampling strategies and parameters.
 
 Importantly, they also showed that self consistency works better than beam search decoding with the same number of beams. Their explanation is that self consistency with sampling generates more diverse samples than beam search. 
 
-Limitation - while they showed gains with 5-10 samples, the best results come from using around 40 samples. That's a lot of generations, which can get pretty expensive and slow. Not very practical.
+Limitation - while they showed gains with 5-10 samples, the best results come from using around 40 samples. That's a lot of generations, which is not very practical.
 
- I've seen many papers apply self consistency with their approach to improve results further. It seems widely known but maybe not widely adopted in practice. 
+I've seen many papers that apply self consistency with their approach to improve results further. It seems widely known but maybe not widely adopted in practice. 
 
-Some relevant related work: Reflexion (Shinn et al., 2023) and Self-Correction (Welleck et al., 2022). 
-
+Some relevant work includes Reflexion (Shinn et al., 2023) and Self-Correction (Welleck et al., 2022). In the Appendix, I discuss another paper (LEAP) that fits this category, but I didn’t have enough space to include it here.
 
 # Active Prompting (ACL 2024)
 
@@ -140,20 +137,19 @@ Code: https://github.com/shizhediao/active-prompt
 Sonnet 3.5 Intro:
 "Ever tried to come up with perfect examples for few-shot Chain-of-Thought prompts? It's not as easy as it sounds, right? You want examples that'll really boost the model's performance, but finding them can be a head-scratcher. Well, some clever folks have been working on automating this process, and it's pretty cool stuff."
 
-Writing CoT examples isn't always easy. You want good examples that will improve the model performance. Like examples that the LLM doesn't handle well yet. This paper automates this step, inspired by active learning from more traditional ML. Here's how it works:
+Writing CoT examples isn't always easy. You want good examples that will improve the model performance, like examples that the LLM doesn't handle well yet. This paper automates this step, inspired by active learning from more traditional ML. Here's how it works:
+
 1. Run each example or task through the LLM multiple times.
 2. Look for examples where the LLM gives inconsistent answers. (uncertanity estimation step)
 3. Annotate these examples and add them to your prompt.
 
 This is nice because you don't need to have labels in order to find examples where the LLM struggles with, and all the extra computation is done offline to build the prompt. 
 
-How is uncertanity esimtated? They experiment with different approaches and Disagreemnt and Entropy consistently showed the best performance. Disagreemnt is simple, it's based on the number of unique answers generated by the model across multiple runs, divided by the total number of runs. Entropy is similar but it also considers that distribution of the unique answers. Two unique answers distributed equally in 10 samples would have a higher entropy (higher uncertanity) than two unique answers with 9/10 identical samples (Disagreement would be the same in both cases).    
+How is uncertanity esimtated? They experiment with different approaches and Disagreemnt and Entropy consistently showed the best performance. Disagreemnt is simple, it's based on the number of unique answers generated by the model across multiple runs, divided by the total number of runs. Entropy is similar but it also considers the distribution of the unique answers. Two unique answers distributed equally in 10 samples would have a higher entropy (higher uncertanity) than two unique answers with 9/10 identical samples (Disagreement would be the same in both cases).    
 
 They also tried using the model's self confidence (asking the model to evaluate its own confidence in its answer). They found it performed poorly as the model tends to be too confident in its generation. A better approach was to use the model's log probaiblities but that is not always available. 
 
-Extra read: Auto-CoT that also aims to improve examplers diversity automatically. It samples questions with diversity and generates reasoning chains to construct CoT examplers. It takes it a step further as it alo annotate the exampler unlike in the adaptive prompt work.  
-"Automatic chain of thought prompting in large language models"
-
+Extra read: [Automatic chain of thought prompting in large language models](https://arxiv.org/pdf/2210.03493) (aka. Auto-CoT) also aims to improve examplers' diversity automatically. It samples questions with diversity and generates reasoning chains to construct CoT examplers. It takes it a step further as it also annotates the exampler unlike in the adaptive prompt work. 
 
 # From Natural Language to Code
 Sonnet 3.5 Intro: "Ever wished your AI assistant could code like a pro? Well, get ready! We're exploring some cool research that's bridging natural language and code. These clever approaches let LLMs handle the thinking while actual programs do the number-crunching. It's like giving your AI a super-smart calculator – let's dive in!"
@@ -162,7 +158,6 @@ There has been a lot of work on code generation from natural lanauge using LLMs,
 
 ## Program of Thoughts (TMLR 2023)
 Paper: [Program of Thoughts Prompting: Disentangling Computation from Reasoning for Numerical Reasoning Tasks](https://arxiv.org/pdf/2211.12588)
-
 Github: https://github.com/TIGER-AI-Lab/Program-of-Thoughts
 
 For tasks that require numerical computation, the idea is to let the LLM do the reasoning and language understanding, and delegate the actual computation to a generated program. The motivation for this is that LLMs are prone to arithmetic calculation erros, and struggle wtih complex computations, but are good at generating code. An LLM with a calculator as a tool is an example of a way to solve tasks that require simple arthmetics. 
@@ -175,7 +170,7 @@ Josh decides to try flipping a house. He buys a house for $80,000 and then puts 
 This increased the value of the house by 150%. How much profit did he make?
 ```
 
-Note that GPT-4o (as of Sep 20, 2024) struggles with this question and answers it incorrectly. It fails to generate the correct equations. In a typical chain-of-thought reasining the demonstartion would like something like this:
+Note that GPT-4o (as of Sep 20, 2024) struggles with this question and answers it incorrectly. It fails to generate the correct equations. In a typical chain-of-thought reasining the demonstartion would look something like this:
 
 ```
 Let's break it down step by step. Josh bought the house for $80,000. He spent $50,000 on repairs. This means that his Total investment is $80,000 + $50,000 = $130,000...
@@ -194,8 +189,8 @@ cost_of_repair = 50000
 ans = value_of_house - cost_of_repair - cost_of_original_house
 ```
 
-Then the solve the program using the SymPy library https://www.sympy.org/en/index.html. 
-This is the general idea. You can desing more complex demonstartions where the program as an intermidate step. 
+Then they solve the program using the SymPy library https://www.sympy.org/en/index.html. 
+This is the general idea. You can design more complex demonstartions where the program is an intermidate step. 
 
 
 ## Program-aided Language Models (Poster, ICML 2023)
@@ -204,7 +199,7 @@ Code: https://reasonwithpal.com
 
 Very similar to PoT but generates valid python code. The LLM generates a python program as its reasining step and offloads the solution to a python interpreter. They also focus on CoT-style reasoning chains. Python is a preferable representation for LLMs for obvious reasons. 
 
-One nice experiment they performed was including the answers in the prompt to assess whether the LLM could replace the interpreter.They observed a significant decline in performance, indicating that the improvement wasn't solely due to the new prompt style. They also found that meaningful variable names are important, leading to better performance than using random names, as you might expect. 
+One nice experiment they performed was including the answers in the prompt to assess whether the LLM could replace the interpreter. They observed a significant decline in performance, indicating that the improvement wasn't solely due to the new prompt style. They also found that meaningful variable names are important, leading to better performance than using random names, as you might expect. 
 
 Demonstartion example:
 
@@ -222,13 +217,7 @@ vegetables_to_count = {
 print(sum(vegetables_to_count.values()))
 ```
 
-
-Related work: BINDING LANGUAGE MODELS IN SYMBOLIC LANGUAGES
-https://github.com/xlang-ai/Binder
-ICLR 2023
-https://arxiv.org/pdf/2210.02875
-
-
+Related work: [Binding Language Models in Symbolic Languages](https://github.com/xlang-ai/Binder) from ICLR 2023. 
 
 # Multi-step Chain-of-Thoughts
 Sonnet 3.5 Intro: "Ever tackled a complex problem by breaking it down into smaller, manageable pieces? That's exactly what these clever 'Plan and Solve' approaches do for language models. They're all about teaching AI to think step-by-step, just like we do. Let's explore how these methods are helping LLMs become better problem solvers!"
@@ -246,121 +235,27 @@ The main limitation is obvious. You need to make multiple LLM calls sequntially.
 
 The following image from the paper explains this approach best. 
 
-{{<figure src="least-to-prompt.png" alt="least-to-most-prompting">}}
+![least-to-most-prompting](least-to-prompt.png)
 
-While this apporach makes a lot of sense, it's just like how humans solve complex problems, it's worth noting that their results show that there are two iportant considerations to make: 1. How trivial is to decompose the task; and 2. How many steps are needed to solve the problem. They show for example that on the GSM8K dataset, least-to-prompt significantly improves on CoT only on questions that require at least 5 reasoning steps. It kinds makes sense. Think of the problem of last-letter concatenation. If the inputs has 2-3 works, one pass with CoT is likely to suffice. But for 10 words, the LLM is likely to get lost somehwere in the middle. Decomposing the problem to 10 sub-problems is expensive but likely lead to the right solution. (they actually reported 100% accuracy on this task)
-e were 12,000 Muslims. So there were 93,000 - 12,000 = 81,000 more Mormons than Muslims. So the answer is 81,000.
-
+While this apporach makes a lot of sense as it's just like how humans solve complex problems, it's worth noting that their results show that there are two iportant considerations to make: 1. How trivial is to decompose the task; and 2. How many steps are needed to solve the problem. They show for example that on the GSM8K dataset, least-to-prompt significantly improves on CoT only on questions that require at least 5 reasoning steps. It kinda makes sense. Think of the problem of last-letter concatenation. If the inputs has 2-3 words, one pass with CoT is likely to suffice. But for 10 words, the LLM is likely to get lost somehwere in the middle. Decomposing the problem to 10 sub-problems is expensive but likely lead to the right solution. (they actually reported 100% accuracy on this task)
 
 # Plan-and-Solve Prompting (ACL 2023)
 Paper: [Plan-and-Solve Prompting: Improving Zero-Shot Chain-of-Thought Reasoning by Large Language Models](arxiv.org/abs/2305.04091)
 Code: https://github.com/agi-edgerunners/plan-and-solve-prompting
 
-This is pretty much the same as least-to-most prompting just with a different name. 
+This work is similar to least-to-most prompting but focusing on zeroshot CoT. The difference is in the execution part. From the authors: "In our experiments, we simply replace “Let’s think step by step” of Zeroshot-CoT with “Let’s first understand the problem and devise a plan to solve the problem. Then, let’s carry out the plan and solve the problem step by step”. Essentially, encouraging the LLM to devise a plan to solve the problem by generating a step-by-step plan and carrying out the plan to find the answer, all in one go, unlike least-to-prompt. They also show that many calculation errors the LLM makes can be addressed by more detailed instructions. 
 
-". In our experiments, we simply replace “Let’s think step by step” of Zeroshot-CoT with “Let’s first understand the problem and devise a plan to solve the problem. Then, let’s carry out the plan and solve the problem step by step”
+Let's see an example. Coin Flip is a toy symbolic reasoning reasining task introduced in the original CoT paper. This task asks the model to answer whether a coin is still heads up after people either flip or don’t flip the coin (e.g., “A coin is heads up. Phoebe flips the coin. Osvaldo does not flip the coin. Is the coin still heads up?” → “no”). The following table from the paper shows how adjustments to the prompt can have a significant impact on the results.(`text-davinci-003` is an older openai model from the GPT-3 family, not competitive today)
 
-To address the calculation errors of Zero-shotCoT and improve the quality of generated reasoning steps, we add more detailed instructions to PS prompting. Specifically, we extend it with “extract relevant variables and their corresponding numerals” and “calculate intermediate results (pay attention to calculation and commonsense)” instructions. This prompting variant is called the PS+ prompting strategy (see Figure 3 (b)). Despite its simplicity, PS+ strategy greatly improves the quality of the generated reasoning process."
+![plan-and-solve-coin-flip](pos-coin-flip.png)
 
-They seem to focus on fewshot PS+. "Similar to Zero-shot-CoT, Zero-shot PS prompting consists of two steps. In step 1, the prompt first makes an inference using the proposed prompting template to generate the reasoning process and the answer to a problem. In step 2, it extracts the answer for evaluation by using the answer extraction prompting, such as “Therefore, the answer (arabic numerals) is”." This means it's more efficent than least-to-most. 
-
-"• The templates should elicit LLMs to determine subtasks and accomplish the subtasks." -- but they do it all at once, unlike least-to-most. 
-
-"To meet the first criterion, we follow Zero-shotCoT and first convert the input data example into a prompt with a simple template “Q: [X]. A: [T]” Specifically, the input slot [X] contains the input problem statement and a hand-crafted instruction is specified in the input slot [T] to trigger LLMs to generate a reasoning process that includes a plan and steps to complete the plan." Thus, the prompt would be “Q: [X]. A: Let’s first understand the problem and devise a plan to solve the problem. Then, let’s carry out the plan and solve the problem step by step.” (PS, not PS+) vs "‘Let’s think step by step”. 
-
-Step 2 prompt to extract the answer: "This prompt includes the answer extraction instruction appended to the first prompt followed by the LLM generated reasoning text. This way, LLM is expected to return the final answer in the desired form."
-
-greedy decoding strategy = (1 output chain)
-
-They mention Auto-CoT: "To leverage the benefit of demonstration examples and minimize manual effort, Zhang et al. (2022) designed Auto-CoT. It first automatically obtains k examples by clustering the given dataset. It then follows Zero-shot-CoT to generate rationales for the selected examples. Finally, demonstration examples are constructed by adding the generated rationales to selected examples as CoT prompts."
-
-They also got signficant improvement with self-consistency. 
-"Self-consistency (Wang et al., 2022b) (SC) is proposed to reduce randomness in LLM’s output by generating N reasoning results and determining the final answer by majority voting. Figure 4 shows that PS+ prompting with SC (73.7% and 84.4%) substantially outperforms that without SC (58.7% and"75.7%) on GSM8K and SVAMP, respectively.
-
-In they related work they describe their main contribution over other works:
-"Our work is different from the above works by focusing on eliciting multi-step reasoning by LLMs in a zero-shot approach. We ask LLMs to write a plan to decompose a complex reasoning task into multiple reasoning steps. Furthermore, we introduce detailed instructions to the prompt to avoid obvious errors in the reasoning steps. We refer readers to the survey (Huang and Chang, 2022) for more related works."
-
-One issue of such works is that the authors showed the slight changes to how to modify the prompt can have significant impact on the results. This might be a problem since they used weaker models. 
-
-
-# Results
-
-Comparison of all approaches on a few datasets. 
-
-
-
-Datasets:
-
-- Arithmetic Reasoning: 
-  (1) the GSM8K (Cobbe et al., 2021) dataset of high quality linguistically diverse grade school math word problems created by human problem writers,
-  (2) AQUA (Ling et al., 2017) dataset of algebraic word problems with natural language rationale
-
-- Commonsense Reasoning:
-  (1) StrategyQA (Geva et al., 2021) benchmark dataset with questions requiring multi-step reasoning but the reasoning steps are not given. Hence, they are to be inferred;
-
-- Symbolic Reasoning: (9) the Last Letter Concatenation (Wei et al., 2022b) dataset of questions requiring the last letters of words in a name to be concatenated (e.g., “James Brown” → “sn”)
-
-
-# Final Thoughts on Prompt Engineering
-
-
-
-
-ANother example where sonnet 3.5 did well on but gpt failed:
-
-Update the following code to take the input file from the command line instead. Note the code hard codes the name in more than one place. 
-
-```
-import ast
-import json
-import os
-
-
-def convert_single_quotes_to_double_quotes(file_path):
-    with open(file_path, 'r') as f:
-        content = f.read()
-        try:
-            # Safely evaluate the single-quoted string using ast.literal_eval
-            data = ast.literal_eval(content)
-            return data
-        except Exception as e:
-            print(f"Error converting {file_path}: {e}")
-            return None
-
-
-def convert_json_files_to_jsonl(folder_path, output_file):
-    with open(output_file, 'w') as jsonl_file:
-        for filename in os.listdir(folder_path):
-            if filename.endswith('HOV.json'):
-                file_path = os.path.join(folder_path, filename)
-                
-                # Convert the single quotes to double quotes and retrieve valid JSON
-                data = convert_single_quotes_to_double_quotes(file_path)
-                
-                # If data is valid, write it to the JSONL file
-                if data:
-                    if isinstance(data, list):
-                        for entry in data:
-                            jsonl_file.write(json.dumps(entry) + '\n')
-                    elif isinstance(data, dict):
-                        jsonl_file.write(json.dumps(data) + '\n')
-
-
-# Get the folder path where this script is located
-folder_path = os.path.dirname(os.path.realpath(__file__))
-output_file = os.path.join(folder_path, 'HOV-queries.jsonl')
-convert_json_files_to_jsonl(folder_path, output_file)
-
-```
-# Framework
-
-Dspy. 
-
+# Prompting Frameworks
+A framework that implements common prompting techniques and simplifies experimentation with different ones would be really helpful. If you're aware of any good options, do let me know! I haven't had much time to explore frameworks in depth. I briefly checked out [DSPY](https://github.com/stanfordnlp/dspy) (looks overkill for what I need) and [ELL](https://github.com/MadcowD/ell), which treat prompts as programs (I like the concept), and [PromptHub](https://www.prompthub.us) (no affiliation, but they kindly gave me a free access code).
 
 
 ## Appendix
-
-### In-Context Principle Learning from Mistakes (LEAP)
+Paper: [In-Context Principle Learning from Mistakes](https://arxiv.org/abs/2402.05403) (ICML Workshop on In-Context Learning, Poster)
+Code: N/A
 
 Similar to self-refine, this work uses the LLM to reflect on its own previously generated outputs. However, the goal here is helping automating the process of writing useful instructions in the prompt (“principles”). It's done offline using gold data with the idea that it can generalize to unseen test examples, so no need to generate multiple samples at test time. The high-level LEAP (Learning Principles) approach goes like this:
 
@@ -434,4 +329,3 @@ Q: {test_question}
 The authors show improvements on some datasets over CoT few-shot but not on all. With Llama-2-chat-70B for example, they couldn't see a benefit from the generated principles, even when GPT-4 was used to generate the principles. Also, for the strong models they evaluated (GPT-4, GPT-4 Turbo) the gains were pretty modest for the most part if at all. 
 
 Which principles provide more value?  "We could not identify any particular pattern as to which method should be used. We thus suggest that in real-life scenarios, both approaches should be tested, and selected using a validation set". 
-
