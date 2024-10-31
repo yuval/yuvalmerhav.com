@@ -29,6 +29,7 @@ LLMs can fix their own mistakes. Generate multiple answers, pick the best one, o
 ## Self Refine (Neurips 2023)
 
 Paper: [Iterative Refinement with Self-Feedback](https://proceedings.neurips.cc/paper_files/paper/2023/file/91edff07232fb1b55a505a9e9f6c0ff3-Paper-Conference.pdf)
+
 Code: https://github.com/madaan/self-refine
 
 Self-Refine is all about the LLM giving itself feedback. Here's the gist:
@@ -51,7 +52,7 @@ The downside? Multiple sequntial passes can be too slow and expensive.
 
 ### Self-Refine Example
 
-One of the tasks in which they observed the highest gains compared to the base models is Constrained Generation, where the model is asked to generate a coherent sentence containing all words/concepts given by the user. This example is based on few-shot prompting to guide model outputs, but they claim that Self Refine works in zero-shot setups as well. 
+One of the tasks in which they observed the highest gains compared to the base models is Constrained Generation, where the model is asked to generate a coherent sentence containing all words/concepts given by the user. This example is based on [few-shot prompting](https://learnprompting.org/docs/basics/few_shot) to guide model outputs, but they claim that Self Refine works in zero-shot setups as well. 
 
 Task: Create a sentence using these words: card, chip, deal, dealer, table.
 
@@ -94,6 +95,7 @@ This experiment is actually a good segway to the next paper.
 
 ## Self Consistency (ICLR 2023)
 Paper: [Self-Consistency Improves Chain of Thought Reasoning in Language Models](https://arxiv.org/pdf/2203.11171)
+
 Code: N/A
 
 The authors nicely refer to this appraoch as "it acts more like a “self-ensemble” that works on top of a single language model".  
@@ -107,7 +109,7 @@ Self-Consistency is a simple idea:
 How to generate multiple responses? They tried different sampling techniques (like temperature sampling). They did an ablation study and concluded that self-consistency is generally robust to sampling strategies and parameters.
 
 Why it works:
-- More diverse responses than beam search decoding (they compared the two)
+- More diverse responses than [beam search decoding](https://machinelearningmastery.com/beam-search-decoder-natural-language-processing/) (they compared the two)
 - Robust across different sampling methods
 - Popular in research, proven effective
 
@@ -149,6 +151,7 @@ For tasks that require numerical computation, the idea is to let the LLM do the 
 
 ## Program of Thoughts (TMLR 2023)
 Paper: [Program of Thoughts Prompting: Disentangling Computation from Reasoning for Numerical Reasoning Tasks](https://arxiv.org/pdf/2211.12588)
+
 Code: https://github.com/TIGER-AI-Lab/Program-of-Thoughts
 
 Works in this area mostly differ is in their intermidate representation, which could be a set of equations, Python code, pseudo code, etc. This work uses Python. It breaks the problem into a multi-step ‘thought’ process and binds semantic meanings to variables to help ground the model in language. Let's see how it works for a typical math word problem. 
@@ -186,6 +189,7 @@ The model picks up this code structure from demonstration examples in the prompt
 
 ## Program-aided Language Models (Poster, ICML 2023)
 Paper: [PAL: Program-aided Language Models](https://arxiv.org/abs/2211.10435)
+
 Code: https://reasonwithpal.com
 
 Like Program of Thoughts, but uses more complex Python, like leveraging data structures instead of just arithmetic. They also focus on CoT-style reasoning chains. One nice experiment they performed was including the answers in the prompt to assess whether the LLM could replace the interpreter. They observed a significant decline in performance, proving that code execution, not just prompt formatting, drives the improvements.. They also found that meaningful variable names are important, leading to better performance than using random names, as you might expect. 
@@ -214,6 +218,7 @@ Humans often tackle a complex problem by breaking it down into smaller, manageab
 
 ## Least-to-Most Prompting (ICLR 2023)
 Paper: [Least-to-Most Prompting Enables Complex Reasoning in Large Language Models](https://arxiv.org/pdf/2205.10625)
+
 Code: N/A
 
 The authors claim that CoT perform poorly on tasks that require solving problems harder than the exemplars shown in the prompts (easy-to-hard generalization). They propose a two step approach:
@@ -243,6 +248,7 @@ To summarize the key implementation notes:
 
 ## Plan-and-Solve Prompting (ACL 2023)
 Paper: [Plan-and-Solve Prompting: Improving Zero-Shot Chain-of-Thought Reasoning by Large Language Models](arxiv.org/abs/2305.04091)
+
 Code: https://github.com/agi-edgerunners/plan-and-solve-prompting
 
 This work is prompt engineering at its finest; tweaking instructions until they work better. Plan-and-Solve prompting boosts zero-shot reasoning accuracy by 20%+ with one simple change: Replace "Let's think step by step" with a two-phase prompt that plans first, solves second: "Let's first understand the problem and devise a plan to solve the problem. Then, let's carry out the plan and solve the problem step by step". Unlike Least-to-Most prompting, this happens in a single LLM call. They also showed that many calculation errors the LLM makes can be addressed by more detailed instructions. 
@@ -267,8 +273,9 @@ A framework that implements common prompting techniques and simplifies experimen
 
 # Appendix
 
-### One more Self-Refine style paper 
+## One more Self-Refine style paper 
 Paper: [In-Context Principle Learning from Mistakes](https://arxiv.org/abs/2402.05403) (ICML Workshop on In-Context Learning, Poster)
+
 Code: N/A
 
 Similar to self-refine, this work uses the LLM to reflect on its own previously generated outputs. But instead of having LLMs check their work repeatedly, teach them principles from their mistakes upfront (no need to generate multiple samples at test time). The results? Modest gains, but the approach reveals interesting insights about how LLMs learn.
