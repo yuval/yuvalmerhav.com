@@ -12,7 +12,7 @@ One might wonder how relevant is prompt engineering today? While newer models ma
 
 Before we dive in, let's recall a basic example of a CoT demonstration:
 
-```
+```text
 Q: Take the last letters of the words in "Willie Valeria Zane" and concatenate 
 them.
 A: Let's think step by step. The last letter of "Willie" is "e". The last letter 
@@ -20,7 +20,7 @@ of "Valeria" is "a". The last letter of "Zane" is "e". Therefore, the answer is
 eae.
 ```
 
-It only needs one pass through the language model. This efficiency, combined with its impressive performance on a variety of tasks, has made this simple technique the go-to choice for prompting. But we can do better. 
+It only needs one pass through the language model. This efficiency, combined with its impressive performance on a variety of tasks, has made this simple technique the go-to choice for prompting. For certain tasks, though, straightforward techniques that build on top of CoT prompting can yield even better results.
 
 # When One Answer Isn't Enough
 
@@ -55,7 +55,7 @@ One of the tasks in which they observed the highest gains compared to the base m
 
 Task: Create a sentence using these words: card, chip, deal, dealer, table.
 
-```
+```text
 Round 1:
 AI: "A dealer offers a card to people at a table."
 Self-Check: Missing words: "chip", "deal"
@@ -74,7 +74,7 @@ Result: ✅ Success!
 
 It's important to note again that the secret sauce is task-specific feedback prompt. For example:
 
-```
+```text
 Words: ['beat', 'drum', 'pen', 'sit', 'use']
 Sentence: A man uses a drum to beat a pen.
 what words from the word list are missing from the sentence?
@@ -153,22 +153,26 @@ Code: https://github.com/TIGER-AI-Lab/Program-of-Thoughts
 
 Works in this area mostly differ is in their intermidate representation, which could be a set of equations, Python code, pseudo code, etc. This work uses Python. It breaks the problem into a multi-step ‘thought’ process and binds semantic meanings to variables to help ground the model in language. Let's see how it works for a typical math word problem. 
 
-```
-Josh decides to try flipping a house. He buys a house for $80,000 and then puts in $50,000 in repairs.
-This increased the value of the house by 150%. How much profit did he make?
+```text
+Josh decides to try flipping a house. He buys a house for $80,000 and 
+then puts in $50,000 in repairs. This increased the value of the house 
+by 150%. How much profit did he make?
 ```
 
 Note that GPT-4o (as of Sep 20, 2024) struggles with this question and answers it incorrectly. It fails to generate the correct equations. In a typical chain-of-thought reasining the demonstartion would look something like this:
 
-```
-Let's break it down step by step. Josh bought the house for $80,000. He spent $50,000 on repairs. This means that his Total investment is $80,000 + $50,000 = $130,000...
+```text
+Let's break it down step by step. Josh bought the house for $80,000. 
+He spent $50,000 on repairs. This means that his Total investment is 
+$80,000 + $50,000 = $130,000...
 ```
 
 As you can see, the LLM does everything, including the calculations. Or as my favorite LLM puts it nicely "Traditional chain-of-thought treats your AI like a student showing their work. Program of Thoughts treats it like a programmer writing code. Look at how it handles this house-flipping problem:"
 
-```
-Question: Josh decides to try flipping a house. He buys a house for $80,000 and then puts in $50,000 in repairs.
-This increased the value of the house by 150%. How much profit did he make?
+```text
+Question: Josh decides to try flipping a house. He buys a house for $80,000 
+and then puts in $50,000 in repairs. This increased the value of the house 
+by 150%. How much profit did he make?
 # Python code, return ans
 cost_of_original_house = 80000
 increase_rate = 150 / 100
@@ -188,7 +192,7 @@ Like Program of Thoughts, but uses more complex Python, like leveraging data str
 
 Demonstartion example:
 
-```
+```text
 # Q: I have a chair, two potatoes, a cauliflower, a lettuce head, two tables, a
 cabbage, two onions, and three fridges. How many vegetables do I have?
 # note: I'm not counting the chair, tables, or fridges
@@ -279,7 +283,8 @@ The high-level LEAP (Learning Principles) approach goes like this:
 
 
 First, the low-level prompt:
-```
+
+```text
 Question: {question}
 Generated Reasoning: {response}
 Generated Answer: {generated_answer}
@@ -298,15 +303,17 @@ the future>
 
 A low-level learned principle example:
 
-```
-1. The system should be designed to understand the context of the question better. In this case, it should
-have recognized that the question was asking for the duration of existence of the European Coal and Steel
-Community before it transitioned into the European Economic Community. Understanding the specific
+```text
+1. The system should be designed to understand the context of the question better. 
+In this case, it should have recognized that the question was asking for the 
+duration of existence of the European Coal and Steel Community before it 
+transitioned into the European Economic Community. Understanding the specific
 context and requirements of a question is crucial for generating accurate answers
 ```
 
 Then, optionally, the high-level princpiles prompt:
-````
+
+```text
 Low-level principles: {low_level_principles}
 Create a list of *unique* and insightful principles to improve future responses based
 on the analysis above.
@@ -320,12 +327,14 @@ List of Principles:
 
 Learned high-level princples examples:
 
-```
-1. Ensure clarity and precision: Responses should be clear and concise, avoiding any ambiguity or unnecessary complexity.
-2. Maintain relevance: Responses should directly address the query or topic at hand, avoiding any unrelated
+```text
+1. Ensure clarity and precision: Responses should be clear and concise, avoiding any 
+ambiguity or unnecessary complexity.
+2. Maintain relevance: Responses should directly address the query or topic at hand, 
+avoiding any unrelated
 or tangential information.
-1. Prioritize uniqueness: Strive to provide unique insights or perspectives in responses, avoiding repetition or
-common knowledge.
+1. Prioritize uniqueness: Strive to provide unique insights or perspectives in responses, 
+avoiding repetition or common knowledge.
 ```
 
 Final prompt:
