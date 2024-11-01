@@ -6,7 +6,7 @@ draft = false
 
 # Introduction: The Evolving Chain-of-thought
 
-In this post I focus on peer-reviewed papers from the last year or two. Most of these papers focus on techniques that aim to improve upon the commonly used [chain-of-thought](https://proceedings.neurips.cc/paper_files/paper/2022/file/9d5609613524ecf4f15af0f7b31abca4-Paper-Conference.pdf) (CoT) approach, especially for tasks requiring complex reasoning. It's not an exhaustive list by any means, but rather my summaries of papers I've been reading recently. It's worth noting that many of these papers use weaker LLMs than today's top closed models. As such, I put less emphasis on the results reported (which is often hard to reproduce anyway) and more on the ideas and where they may be applicable. In addition, many benchmarks are not that reflective of real world usage, which is why often doing well on these benchmarks doesn't mean the model is actually good for a real world task you care about.   
+In this post I focus on peer-reviewed papers from the last year or two. Most of these papers focus on techniques that aim to improve upon the commonly used [chain-of-thought](https://proceedings.neurips.cc/paper_files/paper/2022/file/9d5609613524ecf4f15af0f7b31abca4-Paper-Conference.pdf) (CoT) approach, especially for tasks requiring complex reasoning. It's not an exhaustive list by any means, but rather my summaries of papers I've been reading recently. It's worth noting that many of these papers use weaker LLMs than today's top models. As such, I put less emphasis on the results reported (which is often hard to reproduce anyway) and more on the ideas and where they may be applicable. In addition, many benchmarks are not that reflective of real world usage, which is why often doing well on these benchmarks doesn't mean the model is actually good for a real world task you care about.   
 
 One might wonder how relevant is prompt engineering today? While newer models may have internalized many good prompting practices, there's still a vast ecosystem of models and tasks that benefit greatly from well-crafted prompts. Prompt engineering isn't dying, but it's evolving.
 
@@ -20,7 +20,7 @@ of "Valeria" is "a". The last letter of "Zane" is "e". Therefore, the answer is
 eae.
 ```
 
-It only needs one pass through the language model. This efficiency, combined with its impressive performance on a variety of tasks, has made this simple technique the go-to choice for prompting. For certain tasks, though, straightforward techniques that build on top of CoT prompting can yield even better results.
+This only needs one pass through the language model. This efficiency, combined with its impressive performance on a variety of tasks, has made this simple technique the go-to choice for prompting. For certain tasks, though, straightforward techniques that build on top of CoT prompting can yield even better results.
 
 # When One Answer Isn't Enough
 
@@ -34,10 +34,10 @@ Code: https://github.com/madaan/self-refine
 
 Self-Refine is all about the LLM giving itself feedback. Here's the gist:
 
-1. Write first draft
+1. Write first solution
 2. Review own work
 3. Apply feedback
-4. Create better version
+4. Create better solution (based on the original problem, with all previous solutions and their feedback included in the refined-prompt)
 5. Repeat if needed
 
 One model does it all. The key is a feedback prompt with instructions and examples to guide the feedback. Essentially, this method automates the iterative prompt refinement typically performed manually by users.
@@ -52,7 +52,7 @@ The downside? Multiple sequntial passes can be too slow and expensive.
 
 ### Self-Refine Example
 
-One of the tasks in which they observed the highest gains compared to the base models is Constrained Generation, where the model is asked to generate a coherent sentence containing all words/concepts given by the user. This example is based on [few-shot prompting](https://learnprompting.org/docs/basics/few_shot) to guide model outputs, but they claim that Self Refine works in zero-shot setups as well. 
+One of the tasks in which they observed the highest gains compared to the base models is Constrained Generation, where the model is asked to generate a coherent sentence containing all words/concepts given by the user. The following example is based on [few-shot prompting](https://learnprompting.org/docs/basics/few_shot) to guide model outputs, but the authors claim that Self-Refine works in zero-shot setups as well. 
 
 Task: Create a sentence using these words: card, chip, deal, dealer, table.
 
@@ -73,7 +73,7 @@ Self-Check: All words used! ✓
 Result: ✅ Success!
 ```
 
-It's important to note again that the secret sauce is task-specific feedback prompt. For example:
+It's important to note that the secret sauce is a task-specific feedback prompt. For example:
 
 ```text
 Words: ['beat', 'drum', 'pen', 'sit', 'use']
@@ -132,7 +132,7 @@ Writing CoT examples isn't always easy. You want good examples that will improve
 2. Find where the LLM gives mixed answers (uncertanity estimation step)
 3. Use these "confusing" cases as teaching examples
 
-You don't need correct answers to find where the LLM struggles. Also, all the heavy lifting happens offline when building the prompt.
+You don't need labeled answers to find where the LLM struggles. Also, all the heavy lifting happens offline when building the prompt.
 
 Two ways to spot LLM uncertainty:
 - Disagreement: Count different answers / total attempts
@@ -166,11 +166,11 @@ Note that GPT-4o (as of Sep 20, 2024) struggles with this question and answers i
 
 ```text
 Let's break it down step by step. Josh bought the house for $80,000. 
-He spent $50,000 on repairs. This means that his Total investment is 
+He spent $50,000 on repairs. This means that his total investment is 
 $80,000 + $50,000 = $130,000...
 ```
 
-As you can see, the LLM does everything, including the calculations. Or as my favorite LLM puts it nicely "Traditional chain-of-thought treats your AI like a student showing their work. Program of Thoughts treats it like a programmer writing code. Look at how it handles this house-flipping problem:"
+As you can see, the LLM does everything, including the calculations. Or as my favorite LLM puts it nicely "Traditional chain-of-thought treats your AI like a student showing their work. Program of Thoughts treats it like a programmer writing code". Let's look at how it handles this house-flipping problem:
 
 ```text
 Question: Josh decides to try flipping a house. He buys a house for $80,000 
@@ -184,7 +184,7 @@ cost_of_repair = 50000
 ans = value_of_house - cost_of_repair - cost_of_original_house
 ```
 
-The code is executed using the SymPy library https://www.sympy.org/en/index.html. 
+The authors used the [SymPy library](https://www.sympy.org/en/index.html) to execute the code.
 The model picks up this code structure from demonstration examples in the prompt. You can design more complex demonstartions where the program is an intermidate step. 
 
 ## Program-aided Language Models (Poster, ICML 2023)
@@ -192,7 +192,7 @@ Paper: [PAL: Program-aided Language Models](https://arxiv.org/abs/2211.10435)
 
 Code: https://reasonwithpal.com
 
-Like Program of Thoughts, but uses more complex Python, like leveraging data structures instead of just arithmetic. They also focus on CoT-style reasoning chains. One nice experiment they performed was including the answers in the prompt to assess whether the LLM could replace the interpreter. They observed a significant decline in performance, proving that code execution, not just prompt formatting, drives the improvements.. They also found that meaningful variable names are important, leading to better performance than using random names, as you might expect. 
+Similar to Program of Thoughts, but uses more complex Python, like leveraging data structures instead of just arithmetic. They also focus on CoT-style reasoning chains. One nice experiment they performed was including the answers in the prompt to assess whether the LLM could replace the interpreter. They observed a significant decline in performance, proving that code execution, not just prompt formatting, drives the improvements. They also found that meaningful variable names are important, leading to better performance than using random names, as you might expect. 
 
 Demonstartion example:
 
@@ -238,7 +238,7 @@ While this apporach makes a lot of sense, it's worth noting that their results s
 1. How trivial is to decompose the task?
 2. How many steps are needed to solve the problem? 
 
-They show for example that on the GSM8K dataset, least-to-prompt significantly improves on CoT only on questions that require at least 5 reasoning steps. It kinda makes sense. Think of the problem of last-letter concatenation. If the inputs has 2-3 words, one pass with CoT is likely to suffice. But for 10 words, the LLM is likely to get lost somehwere in the middle. Decomposing the problem to 10 sub-problems is expensive but likely lead to the right solution. (they actually reported 100% accuracy on this task)
+They show for example that on the [GSM8K dataset](https://huggingface.co/datasets/openai/gsm8k) (Grade School Math), least-to-prompt significantly improves on CoT only on questions that require at least 5 reasoning steps. It kinda makes sense. Think of the problem of last-letter concatenation. If the inputs has 2-3 words, one pass with CoT is likely to suffice. But for 10 words, the LLM is likely to get lost somehwere in the middle. Decomposing the problem to 10 sub-problems is expensive but likely lead to the right solution. (they actually reported 100% accuracy on this task)
 
 To summarize the key implementation notes:
 
@@ -247,7 +247,7 @@ To summarize the key implementation notes:
 - Sequential processing means higher latency
 
 ## Plan-and-Solve Prompting (ACL 2023)
-Paper: [Plan-and-Solve Prompting: Improving Zero-Shot Chain-of-Thought Reasoning by Large Language Models](arxiv.org/abs/2305.04091)
+Paper: [Plan-and-Solve Prompting: Improving Zero-Shot Chain-of-Thought Reasoning by Large Language Models](https://arxiv.org/pdf/2305.04091)
 
 Code: https://github.com/agi-edgerunners/plan-and-solve-prompting
 
@@ -261,11 +261,11 @@ Coin Flip is a toy symbolic reasoning task introduced in the original CoT paper.
 
 
 # Prompting Frameworks
-A framework that implements common prompting techniques and simplifies experimentation with different ones would be really helpful. If you're aware of any good options, do let me know! I've tested these briefly but haven't found my perfect fit yet.
+A framework that implements common prompting techniques and simplifies experimentation with different ones would be really helpful. If you're aware of any good options, do let me know! (it's worth a seperate blog post). I've tested these briefly but haven't found my perfect fit yet.
  
 - **DSPy** Full-featured but looks overkill for what I need
 - **ELL**: Treats prompts as programs. Clean concept, lighter implementation.
-- **PromptHub**: Ready-to-use prompt library with version control with prompt chain support
+- **PromptHub**: Ready-to-use prompt library with support for chaining prompts together
 
 
 [DSPy](https://github.com/stanfordnlp/dspy) | [ELL](https://github.com/MadcowD/ell) | [PromptHub](https://www.prompthub.us)
@@ -278,7 +278,7 @@ Paper: [In-Context Principle Learning from Mistakes](https://arxiv.org/abs/2402.
 
 Code: N/A
 
-Similar to self-refine, this work uses the LLM to reflect on its own previously generated outputs. But instead of having LLMs check their work repeatedly, teach them principles from their mistakes upfront (no need to generate multiple samples at test time). The results? Modest gains, but the approach reveals interesting insights about how LLMs learn.
+Similar to self-refine, this work uses the LLM to reflect on its own previously generated outputs. But instead of having LLMs check their work repeatedly, they learn good principles from their mistakes upfront (no need to generate multiple samples at test time). Their experiments showed only modest gains, yet I found the approach interesting nonetheless.
 
 The high-level LEAP (Learning Principles) approach goes like this:
    
