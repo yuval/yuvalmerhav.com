@@ -24,7 +24,7 @@ This only needs one pass through the language model. This efficiency, combined w
 
 # When One Answer Isn't Enough
 
-LLMs can fix their own mistakes. Generate multiple answers, pick the best one, or let the model improve its first attempt. Here's how Self-Consistency and Self-Refine do it.
+Sometimes we can get a better response from the LLM by exploring multiple `reasoning paths`. For example, we can generate multiple responses, pick the best one, or let the model improve its first attempt. That’s essentially what Self-Consistency and Self-Refine do.
 
 ## Self Refine (Neurips 2023)
 
@@ -116,9 +116,9 @@ Why it works:
 The catch? While they showed gains with 5-10 samples, the best results come from using around 40 samples. That's a lot of generations, which is not very practical.
 
 For the curious reader, similar approaches include:
-- Reflexion (Shinn et al., 2023)
-- Self-Correction (Welleck et al., 2022)
-- LEAP (details in Appendix)
+- [Reflexion](https://proceedings.neurips.cc/paper_files/paper/2023/file/1b44b878bb782e6954cd888628510e90-Paper-Conference.pdf) (Shinn et al., NeurIPS 2023)
+- [Self-Correction](https://openreview.net/pdf?id=hH36JeQZDaO) (Welleck et al., ICLR 2023)
+- LEAP (I cover this paper in the Appendix)
 
 # Active Prompting: Finding the Perfect Examples (ACL 2024)
 
