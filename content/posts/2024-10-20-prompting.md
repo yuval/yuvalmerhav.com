@@ -32,13 +32,13 @@ Paper: [Iterative Refinement with Self-Feedback](https://proceedings.neurips.cc/
 
 Code: https://github.com/madaan/self-refine
 
-Self-Refine is all about the LLM giving itself feedback. Here's the gist:
+Self-Refine centres on the LLM providing its own feedback. It’s an iterative process where, in each round, a response is generated, followed by a feedback pass from the LLM. Here’s the essence:
 
-1. Write first solution
-2. Review own work
+1. Draft the initial solution
+2. Review and critique the output
 3. Apply feedback
-4. Create better solution (based on the original problem, with all previous solutions and their feedback included in the refined-prompt)
-5. Repeat if needed
+4. Produce an improved solution (based on the original problem, with all previous solutions and their feedback included in the refined-prompt)
+5. Repeat as necessary
 
 One model does it all. The key is a feedback prompt with instructions and examples to guide the feedback. Essentially, this method automates the iterative prompt refinement typically performed manually by users.
 
