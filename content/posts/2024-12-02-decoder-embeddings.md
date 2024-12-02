@@ -46,7 +46,7 @@ In standard RAG workflows, the process involves:
 
 GritLM introduces a unique optimization: during the indexing phase, when embedding each document, instead of storing document text, the key-value states of the model are cached (a form of self-attention caching similar to prompt caching). This enables the system to skip forward passes for indexed documents during the generation inference. However, this approach lacks the flexibility of traditional RAG, where you can freely structure a prompt with instructions, followed by a list of documents and a query, or vice versa. In GritLM’s setup, the query must always come after the documents, as the cached states are tied to the documents and cannot dynamically attend to new instructions or restructured input sequences. Also, for large LLMs, storing key-value states is significantly more expensive than storing typical document texts. (They also tested other forms of caching but found that document caching works the best). 
 
-### Limitations
+## Limitations
 
 While these works are interesting and require much less data to perform very well on a variety of sequence level tasks (retrieval, clustering, classification, etc), there are a couple of limitations related to their adoption:
 
@@ -56,7 +56,7 @@ While these works are interesting and require much less data to perform very wel
 As far as evaluation goes, the MTEB benchmark focuses predominantly on shorter sequences, making it challenging to evaluate on long documents that these models support. There's also a potential for test set contamination since Mistral was trained on extensive, unspecified datasets derived from the web, which may lead to inflated performance metrics.
 
 
-### Final Thoughts
+## Final Thoughts
 
 For single-task use cases, smaller encoders remain highly competitive and practical. While they require more data and careful fine-tuning, synthetic data generation with strong LLMs has made this process both easier and more cost-effective. In my view, the best trade-off is still a smaller, efficient model for embeddings paired with a larger, more powerful model for generation. That said, for use cases requiring strong performance across a variety of tasks, larger-scale LLMs show great promise as versatile embedding models. 
 
