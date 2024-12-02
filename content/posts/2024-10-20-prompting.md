@@ -233,7 +233,7 @@ The following image from the paper explains this approach best.
 {{<figure src="/prompting_2024/least-to-prompt.png" alt="least-to-most-prompting">}}
 
 
-While this apporach makes a lot of sense, it's worth noting that their results show that there are two iportant considerations to make: 
+While this approach makes a lot of sense, it's worth noting that their results show that there are two important considerations to make: 
  
 1. How trivial is to decompose the task?
 2. How many steps are needed to solve the problem? 
