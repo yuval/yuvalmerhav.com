@@ -1,6 +1,6 @@
 +++
 title = 'Recent Trends with Text Embeddings: Decoder-Only LLMs"'
-date = 2024-12-03
+date = 2024-12-02T06:34:30-05:00
 draft = false
 +++
 
