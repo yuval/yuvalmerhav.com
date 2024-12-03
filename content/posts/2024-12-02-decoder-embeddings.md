@@ -85,6 +85,6 @@ As far as evaluation goes, the MTEB benchmark focuses predominantly on shorter s
 
 ## Final Thoughts
 
-For single-task use cases, smaller encoders remain highly competitive and practical. While they require more data and careful fine-tuning, synthetic data generation with strong LLMs has made this process both easier and more cost-effective (see this [DeepMind paper](https://arxiv.org/pdf/2403.20327) for example). In my view, the best trade-off is still a smaller, efficient model for embeddings paired with a larger, more powerful model for generation. That said, for use cases requiring strong performance across a variety of tasks, larger-scale LLMs show great promise as versatile embedding models. 
+For single-task use cases, smaller encoders remain highly competitive and practical. While they require more data and careful fine-tuning, synthetic data generation with strong LLMs has made this process both easier and more cost-effective (see this [paper](https://arxiv.org/pdf/2403.20327) from DeepMind for example). In my view, the best trade-off is still a smaller, efficient model for embeddings paired with a larger, more powerful model for generation. That said, for use cases requiring strong performance across a variety of tasks, larger-scale LLMs show great promise as versatile embedding models. 
 
 
