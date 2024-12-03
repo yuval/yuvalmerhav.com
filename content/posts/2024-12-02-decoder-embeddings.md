@@ -5,8 +5,8 @@ draft = false
 +++
 
 ## Introduction
-
-Text embedding models have been dominated by fine-tuned BERT-style bidirectional encoders, like [E5](https://yuvalmerhav.com/posts/e5/), which offered state-of-the-art (SOTA) performance for many sequence-level tasks. However, currently, many of the top performing models on the [MTEB leaderboard](https://huggingface.co/spaces/mteb/leaderboard), a text embedding benchmark for various tasks (retrieval, clustering, classification, etc.) are decoder-only language models at the ~7B scale. These models leverage larger context windows and pretraining on web-scale data.
+ 
+Fine-tuned BERT-style bidirectional encoders, such as [E5](https://yuvalmerhav.com/posts/e5/), have long dominated text embedding models, delivering state-of-the-art performance for many sequence-level tasks at an accessible cost. However, currently, many of the top performing models on the [MTEB leaderboard](https://huggingface.co/spaces/mteb/leaderboard), a text embedding benchmark for various tasks (retrieval, clustering, classification, etc.) are decoder-only language models at the ~7B scale. These models leverage larger context windows and pretraining on web-scale data.
 
 This post reviews the papers of the following models:
 
@@ -17,17 +17,44 @@ This post reviews the papers of the following models:
 
 ## Spotlight on E5-Mistral
 
-The core ideas across these top models are similar. Let’s start with E5-mistral, introduced in [this paper](https://arxiv.org/pdf/2401.00368). They start with the pretrained Mistral-7b LLM and fine-tune it with LoRA. Models such as Mistral went through extensive auto-regressive pre-training at web scale, which enable them to acquire good text representations, and only minimal fine-tuning is required to transform them into effective embedding models. This contrasts with smaller text encoders, which rely heavily on weakly-supervised contrastive pre-training. This often involves gathering extensive datasets of positive and negative text pairs, typically generated through self-supervised methods, before fine-tuning for specific downstream tasks.
+The top-performing models share similar principles. Let’s start with E5-mistral, introduced in [this paper](https://arxiv.org/pdf/2401.00368). Starting with the pretrained [Mistral-7B LLM](https://huggingface.co/mistralai/Mistral-7B-v0.1), it’s fine-tuned using LoRA. Models such as Mistral went through extensive auto-regressive pre-training at web scale, which enables them to acquire good text representations, and only minimal fine-tuning is required to transform them into effective embedding models. This contrasts with smaller text encoders, which rely heavily on weakly-supervised contrastive pre-training. This often involves gathering extensive datasets of positive and negative text pairs, typically generated through self-supervised methods, before fine-tuning on a specific downstream task with higher quality data. 
 
 ### Fine-Tuning Details
 
-The fine-tuning step is the standard contrastive learning using cosine similarity, where positive pairs are paired with random in-batch negatives. Since it's a decoder-only LLM, they append an [EOS] token to the end of the query and document. These sequences are fed into the LLM, and the final-layer [EOS] vector is extracted to represent the query and document embeddings. With a typical causal attention that next token prediction models utilize (each token can only attend to previous tokens in the sequence), the [EOS] embedding is used since it can attend to all prior tokens in the context (similar to how the [CLS] token is used in encoders). An alternative approach would involve altering the attention mechanism (as we will see later).
+The fine-tuning process follows standard contrastive learning with cosine similarity, pairing positive examples with random in-batch negatives. Since it's a decoder-only LLM, an [EOS] token is appended to the query and document, and the final-layer [EOS] vector is extracted as the embedding. In causal attention, where tokens can only attend to previous tokens, the [EOS] embedding effectively represents the entire sequence, akin to the [CLS] token in encoders. An alternative approach could involve modifying the attention mechanism, as we’ll explore later.
 
-The paper also goes in detail on how they generated synthetic data with GPT for training per task with instructions which I’m skipping here. (it’s pretty interesting and worth a read)
+The paper also goes in detail on how they generated per-task synthetic data with GPT using instructions which I’m skipping here (worth a read).
 
 ## Bi-Directional Attention
 
-One key difference of the other works that followed-up is that all modify Mistral's causal attention to bidirectional during contrastive training. This is more intuitive for sequence-level tasks like embeddings where each token can attend to any other token in the context. All studies report improved embedding representations as a result. Another key difference is how embeddings are extracted. Instead of relying on the final token representation, these models apply various pooling techniques, such as mean pooling or weighted pooling based on attention scores, to generate more robust embeddings. NV-Embed, developed by Nvidia, stands out by being exclusively fine-tuned on public datasets without the use of synthetic data. 
+One key difference of the other works that followed is that all modify Mistral's causal attention to bidirectional during contrastive training. This is more intuitive for sequence-level tasks like embeddings where each token can attend to any other token in the context. All studies report improved embedding representations as a result. Another key difference is how embeddings are extracted. Instead of relying on the final token representation, these models apply various pooling techniques, such as mean pooling or weighted pooling based on attention scores, to generate more robust embeddings. 
+
+## A Generalist Embedding Model
+
+A generalist models is one that perform well on different tasks (retrieval, classification, clustering, etc.). This versatility is often achieved by using task-specific instructions during fine-tuning. For example, the model takes the following format:
+
+```
+Instruct: {task_definition}
+Query: {query}
+```
+
+When fine-tuning on a retrieval dataset, each query might be prefixed with:
+
+```
+Instruct: Given a web search query, retrieve relevant passages that answer the query
+Query: how do solar panels work
+```
+
+The model only adds instructions to queries, not documents. This design allows for offline document indexing while enabling different search behaviors through query instructions.
+
+### NV-Embed's Contribution
+
+NV-Embed (Nvidia) suggests that using in-batch negatives, while effective for retrieval, may not suit other tasks. For instance, in clustering, random in-batch examples might actually be positives. They propose a two-stage training:
+
+1. Use in-batch negatives only when training on retrieval tasks
+2. Avoid in-batch negatives for other tasks
+
+**Note:** While idea makes sense to me, the paper presents it as a key contribution without providing experimental evidence of its impact (I read the entire thing!). When reading research papers, it's important to distinguish between interesting ideas and those actually validated through experimental results. The lack of supporting data here suggests this contribution may be less significant than presented.
 
 ## GritLM: A Hybrid Approach to Generation and Embedding
 
