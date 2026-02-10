@@ -88,7 +88,7 @@ Note: CC doesn't explicitly tell you which model it used for a skill, but I trus
 
 2. *The Profiling Skill*.
 
-I use CC often to monitor logs (live runs or Datadog CSV exports - I didn't connect it to DD yet). Claude knows how to profile Python much better than me, but it still required a lot of back-and-forth, and some of the things it did were sub-optimal for what I was after, like exploring the codebase. I ended up with a fairly involved skill [profile-python](https://github.com/yuval/dotfiles/blob/main/claude/skills/profile-python/SKILL.md) to personalize the profiling style to the kind of systems that I'm currently working on - heavy async processing of a lot of data through multi-provider LLM pipelines. 
+I use CC often to monitor logs (live runs or Datadog CSV exports - I didn't connect it to DD yet). Claude knows how to profile Python much better than me, but it still required a lot of back-and-forth, and some of the things it did were sub-optimal for what I was after, like exploring the codebase for no good reason. I ended up with a fairly involved skill [profile-python](https://github.com/yuval/dotfiles/blob/main/claude/skills/profile-python/SKILL.md) to personalize the profiling style to the kind of systems that I'm currently working on - heavy async processing of a lot of data through multi-provider LLM pipelines. 
 
 ### plugins
 
