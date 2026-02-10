@@ -100,7 +100,6 @@ Run `/plugins` to see what's installed or discover new ones. My current setup:
     Python language server (Pyright) for type checking and code intelligence
   ● frontend-design
     Frontend design skill for UI/UX implementation
-    directly from source repositories into your LLM context.
   ● code-review
     Automated code review for pull requests using multiple specialized agents with confidence-based scoring
 ```
