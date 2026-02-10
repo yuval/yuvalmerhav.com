@@ -1,5 +1,5 @@
 +++
-title = "Customizing Claude Code: My Setup"
+title = "Claude Code: My Setup"
 date = 2026-02-10
 draft = false
 +++
