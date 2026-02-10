@@ -134,7 +134,7 @@ For me, User Memory is the most important, followed by Project Memory. You can f
 
 - `/clear`: I use this often when previous context isn't useful anymore.
 - `/compact`: Claude runs this automatically when you hit the context limit (based on `/context` ~33k tokens reserved), but you can run it manually with instructions as needed. E.g., `/compact keep only the profiling summary and initial task and drop intermediate outputs`. BTW, while compaction is a lossy operation, I noticed CC saves a file on disk with the full transcript and points to it in the summary
-- `Expansions` (Ctrl-o / Ctrl-e): Ctrl-o expands tool calls. It's verbose, but it's how i often debug the agent. Sometimes Claude fails a command (like a permission error) and falls back to something else. You can only catch and fix that (e.g., by granting sudo access) if you check the logs. Ctrl-e shows the full history. 
+- `Expansions` (Ctrl-o / Ctrl-e): Ctrl-o expands tool calls. It's verbose, but it's how I often debug the agent. Sometimes Claude fails a command (like a permission error) and falls back to something else. You can only catch and fix that (e.g., by granting sudo access) if you check the logs. Ctrl-e shows the full history. 
 - `Parallel Sessions`. Sessions are tied to directories and a common workflow is to run parallel Claude sessions using git worktrees. On the Desktop/Web apps, every new "chat" is a new session.
 - `Bash Mode`. You can toggle bash mode with `!`. I switch between the two often. It supports ctrl-r for history search across both bash and even Claude history, which is cool.
 
