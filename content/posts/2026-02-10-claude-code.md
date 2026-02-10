@@ -104,8 +104,7 @@ Run `/plugins` to see what's installed or discover new ones. My current setup:
     Automated code review for pull requests using multiple specialized agents with confidence-based scoring
 ```
 
-These are all Claude official plugins. I like the code review plugin and find it useful for finding issues. But it eats a lot of tokens and can be slow. I've seen it consumes 150K tokens for small PRs cause it executes many parallel review sub-agents. 
-
+These are all Claude official plugins. A plugin is not a separate thing, it just bundles together other components (skills, agents, MCPs, etc.). For example, `code-review` bundles multiple parallel Sonnet sub-agents plus a `code-review` command. I find it useful for finding issues and use it often. But it eats a lot of tokens and can be slow. I've seen it consume 150K tokens for small PRs across its parallel review sub-agents.
 
 ## Context & Memory
 
