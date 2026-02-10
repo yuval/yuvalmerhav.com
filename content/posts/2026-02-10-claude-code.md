@@ -1,0 +1,150 @@
+
++++
+title = "Customizing Claude Code: My Setup"
+date = 2026-02-10
+draft = false
++++
+
+  
+## Intro
+
+The nice thing about Claude Code (CC) is that it works great out of the box. This is how tools should be. But there's also a lot of customization available, with new features dropping constantly, and it can get pretty hairy and confusing.
+
+Most of what I discuss here is available in my repo [yuval/dotfiles](https://github.com/yuval/dotfiles), so you can go straight there and ask your favorite coding agent for a summary. I also keep it up to date so you can take a look even if you read this long after it was posted (Feb 10, 2026; CC (running Opus 4.6) and Codex (running GPT 5.3) are the SOTA coding agents). 
+
+I'm not going to talk about my overall workflow, just my setup and why (and when) I customize Claude. For the most part, I prefer CC to do what it knows and not add too much mental burden, but I did find it useful to tweak things here and there.
+
+## 1. Making Claude Run Faster
+
+CC and Codex with the latest models are slow (sorry gemini- and cursor-cli, haven't tried yet). Making things faster is always a big win. You can always use a faster model, but that's rarely worth it for anything important. 
+
+Interestingly, as I'm writing this, CC released a "fast mode" - Opus 4.6 just faster. It costs significantly more and isn't included in standard subscriptions. But for people working on "serious" products, I'm sure it's worth it. 
+
+### Permissions
+
+This is probably the most important thing for reducing latency. I often work in `accept-edits-on` (I often switch modes with shift-tab depending on the task) but never with `--dangerously-skip-permissions`, as I'm not a solo dev; most of my work is on my company's codebases, DBs, etc. I know some people use sandboxes or VMs but I haven't tried that yet. 
+
+Instead, I make sure my permission allow-lists are up-to-date so CC doesn't bother me with requests to read a directory or run `find`. Here's my [settings.json](https://github.com/yuval/dotfiles/blob/main/claude/settings.json) which has pre-approved tool patterns I update frequently.
+
+## 2. Making YOU Work Faster
+
+CC lets you enable skills, commands (which seem to be replaced by skills), agents, plugins, and hooks. I try not to over-engineer it. I just add things when I notice I keep doing something slowly too often. While it sounds like a lot, you can run each of these as a command to see what you're currently using. For example, if I run `/agents` I get:
+
+```
+│ Agents                                                                                                                      │
+│ 7 agents                                                                                                                    │
+│                                                                                                                             │
+│ ❯ Create new agent                                                                                                          │
+│                                                                                                                             │
+│   User agents (/Users/yuval/.claude/agents)                                                                                 │
+│   shipit · inherit                                                                                                          │
+│                                                                                                                             │
+│   Built-in agents (always available)                                                                                        │
+│   Bash · inherit                                                                                                            │
+│   general-purpose · inherit                                                                                                 │
+│   statusline-setup · sonnet                                                                                                 │
+│   Explore · haiku                                                                                                           │
+│   Plan · inherit                                                                                                            │
+│   claude-code-guide · haiku
+```
+
+I only have one user agent: [shipit](https://github.com/yuval/dotfiles/blob/main/claude/agents/shipit.md). I initially had a bash script to handle git add / commit / push, but it was often too slow, esp handling common conflicts manually, writing commit msgs (which I ended up asking CC to write and then pasted to the commit msg), etc. I created this sub-agent and assigned it Sonnet 4.5. 
+
+Pro tip: Give your agent a color so it's clear when it's running. 
+
+*Skills*. Skills are probably the most talked-about feature. They are simple, and you can find many online (Anthropic has a [skills repo](https://github.com/anthropics/skills)). While the main idea behind skills is not about speed, they often help speed so I’ve included them here. I only have two custom skills.
+
+The first one is a tiny todos skill that is specific for a repo I have where I have a lot of my notes:
+
+```
+# .claude/skills/todos/SKILL.md
+
+description: List work todos
+model: Haiku 4.5
+allowed-tools: Read, Grep
+---
+
+Read kb/todo/work.md and display its contents. Do not search the repo or use any other tools / agents.
+```
+
+I added it cause I used to ask CC to list my todos often and it was too slow. I told this skill to use Haiku. It's a "dumb" model compared to Opus, so I don't recommend it for anything not simple, but for this, it does the job. Now I run `/todos` and get results in ~5 seconds (still slow but much faster than before). I could also just add a line to my CLAUDE.md but preferred the skill to "enforce" the model and tools. 
+
+Note: CC doesn't explicitly tell you which model it used for a skill, but I trust it and don't bother to switch to Haiku first with `/models` before I run it. When I run claude -p "/todos" it must be using the model defined in the skill. Maybe you can tell with OpenTelemetry integration but I didn't bother to find out...
+
+
+*The Profiling Skill*.
+
+I use CC often to monitor logs (live runs or Datadog CSV exports - I didn't connect it to DD yet). Claude knows how to profile Python much better than me, but it still required a lot of back-and-forth. I created a skill [profile-python](https://github.com/yuval/dotfiles/blob/main/claude/skills/profile-python/SKILL.md) to personalize the profiling style to the kind of systems that I'm currently working on - heavy async processing of a lot of data through multi-provider LLM pipelines. The key instruction: When code is running, monitor the log, profile memory/CPU, and when you find something worth pointing out, find the exact place in the code likely to be the culprit. Report findings as you go. 
+
+Why is this a skill and not a sub-agent like shipit? I think either one could work, but I wanted it to follow a "script" and be interactive and less of "go do your thing and come back with the results when you're done". 
+
+*plugins*. Run /plugins to see what's installed or discover new ones. My setup:
+
+```
+ Installed plugins (4):
+  ● pyright-lsp
+    Python language server (Pyright) for type checking and code intelligence
+  ● frontend-design
+    Frontend design skill for UI/UX implementation
+    directly from source repositories into your LLM context.
+  ● code-review
+    Automated code review for pull requests using multiple specialized agents with confidence-based scoring
+```
+
+I like the code review plugin and find it useful for finding issues. But it eats a lot of tokens and can be slow. I've seen it consumes 150K tokens for small PRs cause it executes many parallel review sub-agents. 
+
+### CLIs & Context
+
+I briefly explored MCPs (specifically for context as CC often makes assumptions based on out-of-date knowledge), as I found myself copying and pasting documentation too often which is slow. The CC docs also recommend referring Claude to a file rather than pasting. I had the popular [context7](https://github.com/upstash/context7) plugin/MCP for example but I found the `webfetch` tool usually good enough with the right instructions for my needs. 
+
+Many users prefer using CLIs since CC is already a CLI expert and it works well without eating a lot of tokens usually. One I really like:
+- Postgres: I created a read-only user for our database and gave CC [instructions about psql](https://github.com/yuval/dotfiles/blob/main/claude/rules/database.md). Since the DB schema is already in the codebase, it gets the context it needs before querying. Initially I was doing it manually - asking CC for an SQL query, execute it, then paste the results or point CC to a file with the results. 
+- Github (gh) / Gitlab (glab) are obvious ones.
+- I don't do much frontend but when I do [playwright-cli](https://github.com/microsoft/playwright-cli) from Microsfot is handy so that I don't need to provide CC with screenshot and provide details. (fyi, there's also a new [chrome](https://code.claude.com/docs/en/chrome) integration)
+- I still do most AWS / GCP things on their portals but I'm sure that soon I will just let CC use the aws/gcp clis for most things (I really hate the GCP portal especially)
+
+*hooks*. I don’t have any CC hooks defined right now. If I were to add one, it would likely focus on safety enforcement around potentially destructive commands like rm. My current safeguards against destructive operations mostly live in memory so they aren’t strictly enforced. I hope I don't regret that...
+
+A Claude session is tied to the current working directory. The majority of features in CC are there to help with context
+management for that session. They also help with quality control, personalized workflows, and speed. The reason it gets complex is that there are many different ways to implement the same thing, and there's also some lack of transparency when working with CC (more on this later).
+
+
+
+# Memory Management
+Before we dive in, let's make sure you have the context percentage in your CC statusline. You can run the `/statusline` command to configure it:
+```
+❯ /statusline
+
+⏺ statusline-setup(Configure statusline from PS1)
+  ⎿  Done (7 tool uses · 13.0k tokens · 25s)
+
+⏺ Your status line is already configured and looks good. It shows current directory, git branch with dirty indicator, model name, and context usage. No changes needed.
+```
+
+[This one](https://github.com/yuval/dotfiles/blob/main/claude/statusline.sh) is mine. For context management it's important to have the context precentage on the statusline (you can also run `/context` for a detailed breakdown).
+
+
+Memory in CC has many layers (see [docs](https://docs.anthropic.com/en/docs/claude-code/memory)), and they even forgot to list user-level rules (~/.claude/rules/). 
+
+For me, User Memory is the most important, followed by Project Memory. You can find mine [here]( https://github.com/yuval/dotfiles/blob/main/claude/CLAUDE.md). It links out to specific rules files ([python.md](https://github.com/yuval/dotfiles/blob/main/claude/rules/python.md), [testing.md](https://github.com/yuval/dotfiles/blob/main/claude/rules/testing.md), [database.md](https://github.com/yuval/dotfiles/blob/main/claude/rules/database.md), etc.). You can dump everything into CLAUDE.md, but I prefer separating them for organization. Run `/memory` to verify whatever you have is set up correctly.
+
+
+*Auto-memory*. This is a new feature it seems. These are notes Claude writes for itself stored in ~/.claude/projects/<project>/memory/MEMORY.md. According to the docs, the first ~200 lines of MEMORY.md are injected into every conversation's system prompt for that project. I'm not entirely sure why we need this separate from the project-level CLAUDE.md, but I guess the CC team has a good reason to treat this memory differently. I went over all my MEMORY.md files and most were empty.  
+
+# Some Useful Commands & Workflow
+
+- /clear: I use this often when previous context isn't useful anymore.
+- /compact: Claude runs this automatically when you hit the context limit (based on `/context' ~33k tokens reserved), but you can run it manually with instructions as needed. E.g., /compact keep only the profiling summary and initial task and drop intermediate outputs. BTW, while compaction is a lossy operation, I noticed CC saves a file on disk with the full transcript and points to it in the summary
+- Expansions (Ctrl-o / Ctrl-e): Ctrl-o expands tool calls. It's verbose, but it's how i often debug the agent. Sometimes Claude fails a command (like a permission error) and falls back to something else. You can only catch and fix that (e.g., by granting sudo access) if you check the logs. Ctrl-e shows the full history. It's also nice sometimes to see what it's actually doing and learn how it works. 
+  
+- Parallel Sessions. Sessions are tied to directories, and a common workflow is to run parallel Claude sessions using git worktrees on using the CLI. On the Desktop/Web apps, every new "chat" is a new session.
+
+- Bash Mode. You can toggle bash mode with !. I switch between the two often. It supports ctrl-r for history search across both bash and even Claude history, which is cool.
+
+- Interrupting Esc or Ctrl-c stops Claude mid-action while preserving context. Useful when you see it going down a rabbit hole.
+
+# Codex
+
+I talked a lot about CC but I do use Codex sometimes. Mostly recently, CC has been having more down times or just being slower than usual. I'm still in shock how these companies deal with all the demand and manage to serve so many tokens without being down much more. Kudos to them. Anyhow, I don't like to be without a coding agent for too long, so it's nice that switching agents is easy. Since I yet to use Codex much, I didn't bother to set it up the same way. For now I only added an [AGENTS.md](https://github.com/yuval/dotfiles/blob/main/codex/AGENTS.md) similar to my user-level CLAUDE.md and a few [safety rules](https://github.com/yuval/dotfiles/blob/main/codex/rules/safety.rules) taking directly from my CC's deny list.
+
+Happy coding, and congrats to Seahawks fans for winning the Super Bowl.
