@@ -95,7 +95,7 @@ I use CC often to monitor logs (live runs or Datadog CSV exports - I didn't conn
 Run `/plugins` to see what's installed or discover new ones. My current setup:
 
 ```
- Installed plugins (4):
+ Installed plugins (3):
   ● pyright-lsp
     Python language server (Pyright) for type checking and code intelligence
   ● frontend-design
@@ -104,7 +104,7 @@ Run `/plugins` to see what's installed or discover new ones. My current setup:
     Automated code review for pull requests using multiple specialized agents with confidence-based scoring
 ```
 
-I like the code review plugin and find it useful for finding issues. But it eats a lot of tokens and can be slow. I've seen it consumes 150K tokens for small PRs cause it executes many parallel review sub-agents. 
+These are all Claude official plugins. I like the code review plugin and find it useful for finding issues. But it eats a lot of tokens and can be slow. I've seen it consumes 150K tokens for small PRs cause it executes many parallel review sub-agents. 
 
 
 ## Context & Memory
