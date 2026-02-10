@@ -23,7 +23,7 @@ Interestingly, as I'm writing this, CC released "fast mode" - faster Opus 4.6 re
 
 This is probably the most important thing for reducing latency. I often work in `accept-edits-on` (I switch modes with `shift-tab` often depending on the task) but never with `--dangerously-skip-permissions`, as most of my work is on my company's codebase, DB, etc. I know some people use sandboxes or VMs but I haven't tried that yet. 
 
-Instead, I make sure my permission lists are up-to-date so CC doesn't bother me with requests to read a directory or run `find`. Here's my [settings.json](https://github.com/yuval/dotfiles/blob/main/claude/settings.json) which has pre-approved tool patterns I update frequently.
+Instead, I make sure my permission lists are up-to-date so CC doesn't bother me with requests to read a directory, run safe commands, or do web searches (I whitelist domains as I go). Here's my [settings.json](https://github.com/yuval/dotfiles/blob/main/claude/settings.json) which has pre-approved tool patterns I update frequently.
 
 ## 2. Making myself Work Faster
 
