@@ -49,7 +49,7 @@ CC lets you enable skills, commands (which seem to be replaced by skills), agent
 
 ### Custom Agents
 
-I only have one user agent across repos: [shipit](https://github.com/yuval/dotfiles/blob/main/claude/agents/shipit.md). I initially had a bash script to handle this, but it was often too slow, esp handling common conflicts manually, writing commit msgs (which I often asked CC to write and then pasted to the commit msg), etc. I created this sub-agent and assigned it Sonnet 4.5. 
+I only have one user agent across repos: [shipit](https://github.com/yuval/dotfiles/blob/main/claude/agents/shipit.md). I commit and push many times a day, and doing it manually or asking CC ad-hoc usually works just fine, but having a dedicated agent that's consistent, fast and just works 95% of the time was a no-brainer. This could also be a skill (more on skills later), as conceptually the line between the two isn't always clear. In CC, sub-agents spin up their own context window with a clean system prompt, which is a better fit for shipit since it doesn't need the current conversation. Shipit's entire workflow is driven by git commands: `git status`, `git diff --cached`, etc. It generates the commit message from the diff, not from conversation context.
 
 Tip: Give your agent a color so it's clear when it's running. 
 
