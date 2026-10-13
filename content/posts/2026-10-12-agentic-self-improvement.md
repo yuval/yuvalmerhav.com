@@ -113,7 +113,7 @@ We can think of the per-task forum as retry memory, and the cross-task forum as 
 
 ### Results
 
-For coding, they evaluated on Terminal-Bench 2, Polyglot, and SWE-Bench Pro. I'm glossing over the results quickly here - see the paper for more details and benchmarks.
+For coding, they evaluated on Terminal-Bench 2, [Polyglot](https://github.com/Aider-AI/polyglot-benchmark), and [SWE-Bench Pro](https://github.com/scaleapi/SWE-bench_Pro-os). I'm glossing over the results quickly here - see the paper for more details and benchmarks.
 
 Like with Meta-Harness, the experimental setup is important. For SWE-Bench Pro, for example, they run the loop on a sample of 50 tasks and report the final success rate. Recall that the agent makes up to 10 attempts (generations) per task. They report the success rate after the run completes - there are no separate unseen tasks they evaluate on. SWE-Bench Pro has many more tasks, so I don't see a clear reason not to evaluate on held-out ones, even if it's a small sample to keep things cheap. For Terminal-Bench 2, they use the same setup as Meta-Harness and evaluate on the benchmark's 89 tasks. They also use 3 seeds and report the average and standard deviation, which is important because these benchmarks are small and results can vary from run to run - something I don't think Meta-Harness did.
 
