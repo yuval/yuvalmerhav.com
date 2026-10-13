@@ -124,6 +124,10 @@ The task-solving agents they compare are the Claude Agent SDK with Haiku 4.5 and
 Now the interesting part. Does the memory help on tasks it has never seen, with no retries, i.e., one attempt per task? They ran an experiment to find out, but only on Polyglot (coding) and ARC-AGI-1 (abstract reasoning). They used a held-out test set of 20 tasks for each benchmark and showed improvements over zero-shot without memory - on the order of going from about 2 to 4 solved tasks. As expected, which model is used for the solver agent and for the memory builder has a significant impact on the results. The runs with memory used an extra LLM call before each task to make a plan that includes the memory. I think it'd be better to add a similar "plan" step without the memory to the zero-shot runs, so we can isolate the planning gains from the memory gains. Also, the authors point out that 7 of the 20 Polyglot tasks are the same exercise as a "training" task in another language (e.g., Go vs. Java). 
 
 
+## Final Notes
+
+I like both papers. I'd like to see more on how well they generalize to unseen tasks, but regardless, it's pretty clear these are good ideas and that this is where things are headed. Now it's time to take tasks I care about and start experimenting.
+
 ## Related Work
 
 For reference, here are a few related works these papers compare against: ACE, DGM, HyperAgents, GEPA, and OpenEvolve. I asked Claude to write a TL;DR for each of them, and here's what it came up with:
