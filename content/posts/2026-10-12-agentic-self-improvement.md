@@ -50,7 +50,7 @@ Each benchmark has a different setup, and it's important to follow each one to u
 
 #### Retrieval-augmented math
 
-Before solving a new math problem, it helps to show the model a few solved problems, but only if they're actually useful for the new one. In fact, they show that random few-shot hurts performance. Here the harness picks which solved examples, from a corpus of ~535K, to show the model before it tries a new olympiad problem. The proposer ran 40 iterations, producing 109 candidate harnesses, each scored by how well GPT-OSS-20B (the solver) did on 250 search-set problems. The best one was then evaluated on 200 unseen IMO-level problems, with GPT-OSS-20B plus four models not used during search:
+Before solving a new math problem, it helps to show the model a few solved problems, but only if they're actually useful for the new one. In fact, they show that random few-shot hurts performance. Here the harness picks which solved examples, from a corpus of ~535K, to show the model before it tries a new olympiad problem. The proposer ran 40 iterations, producing 109 candidate harnesses, each scored by how well GPT-OSS-20B (the solver) did on 250 search-set problems. The best one was then evaluated on 200 unseen IMO-level problems, with GPT-OSS-20B plus four models not used during search (GPT-5.4-nano, GPT-5.4-mini, Gemini-3.1-Flash-Lite and Gemini-3-Flash). The paper's abstract calls all five held-out, but GPT-OSS-20B was the search model.
 
 | Method | Avg over 5 models |
 |---|---|
@@ -60,7 +60,11 @@ Before solving a new math problem, it helps to show the model a few solved probl
 | Dense retrieval (k=5) | 38.1 |
 | Meta-Harness | 38.8 |
 
-The discovered math harness first guesses each problem's topic from simple keyword checks (combinatorics, geometry, number theory, or other), then uses a topic-specific recipe to pull similar solved problems into the prompt. During search, harness versions build on earlier ones, forming separate chains of improvements. Two of these chains became good at different topics: one had the best geometry recipe, the other the best combinatorics recipe. Without being told to, the proposer combined them into a single harness, taking each topic's recipe from the chain that did it best. As you can see in the results, on average it's a bit better than simple BM25 and dense retrieval. My read is that the gains aren't significant: against dense retrieval (k=5) it's only +0.7 points on average, and it actually loses on both Gemini models. The authors instead emphasize that Meta-Harness is more consistent across the 5 models they tried (GPT-OSS-20B, used during search, plus 4 models it never saw during search: GPT-5.4-nano, GPT-5.4-mini, Gemini-3.1-Flash-Lite and Gemini-3-Flash). Note that the paper's abstract calls all five held-out, but GPT-OSS-20B was the search model.
+The final harness works in two steps. First, it guesses the problem's topic (combinatorics, geometry, number theory, or other) using simple keyword checks. Then it retrieves similar solved problems with BM25, using a slightly different rule per topic, e.g., how many examples to pull and whether to favor harder problems.
+
+A neat detail: the proposer usually builds each new harness by editing an earlier one, so the search grows a few separate lines of descendants. One line ended up best at geometry, another at combinatorics, and the proposer merged them on its own, taking each topic's rule from the line that handled it best.
+
+How much does it help? Not much over standard retrieval. On average it beats BM25 by 1.3 points and dense retrieval by 0.7, and dense retrieval actually does better on both Gemini models. The authors' main argument is consistency: Meta-Harness improves over no retrieval on all five models, while dense retrieval and random few-shot hurt some of them.
 
 #### TerminalBench-2
 
