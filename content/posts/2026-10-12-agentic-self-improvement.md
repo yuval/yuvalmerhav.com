@@ -10,8 +10,8 @@ I attended COLM 2026 last week in SF. I'm starting a blog series about some of t
 
 I'll start with a topic that's been getting a lot of buzz lately: harness self-improvement, aka self-modifying software and harnesses, auto research, etc. etc. In this post I focus on only two papers - there are many more, but these are the ones I happened to look into. My time is limited, and I usually prefer going deep on a couple of works over doing a breadth survey. Micro type of guy vs. macro. The two approaches are also very different, so they complement each other nicely.
 
-- [Meta-Harness](https://arxiv.org/abs/2603.28052). A coding agent searches over the harness code itself, with full access to past code, scores and traces.
-- [Knowledge-Centric Self-Improvement](https://arxiv.org/abs/2607.19592). Agents write and curate a shared *knowledge base* that gets fed to future agents.
+- [Meta-Harness](https://yoonholee.com/meta-harness/) ([code](https://github.com/stanford-iris-lab/meta-harness)). A coding agent searches over the harness code itself, with full access to past code, scores and traces.
+- [Knowledge-Centric Self-Improvement](https://arxiv.org/abs/2607.19592) ([code](https://github.com/recursive-knowledge/KSI)). Agents write and curate a shared *knowledge base* that gets fed to future agents.
 
 ![Meta-Harness vs. Knowledge-Centric self-improvement loops](/self-improvement-loops.svg)
 
