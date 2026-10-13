@@ -101,7 +101,7 @@ My take: the snapshot idea looks real and generic, but showing that it works on 
 
 This paper presents a very different approach to the same problem. Instead of rewriting code, agents build a shared knowledge base (KB) across many attempts. The agents are disposable: we don't optimize the harness, we optimize the KB. Basically, agents build "memory" together for the next rounds, and that memory keeps evolving over time.
 
-The KB is a SQLite store behind an MCP server. The setup runs in **generations** (10 per benchmark). The gist is pretty simple - in each generation, an agent tries to solve a task defined in `TASK.md`. Each agent also receives `MEMORY.md`, which is the KB distilled into something the agent can work with. Once a task is solved correctly, it leaves the pool, so tokens aren't wasted revisiting it.
+The KB is a SQLite store behind an MCP server. The setup runs in **generations** (10 per benchmark). The gist is pretty simple - in each generation, an agent tries to solve a task defined in `TASK.md`. Each agent also receives `MEMORY.md`, which is the KB distilled into something manageable for the agent. Once a task is solved correctly, it leaves the pool, so tokens aren't wasted revisiting it.
 
 How is `MEMORY.md` generated? I'll keep it high level - check the paper for the exact details. You can think of the KB as a forum. Each agent working on a task contributes a post about what it learned solving that task, and in addition, a similar learning that's relevant across tasks, so other tasks can benefit from it. Agents are also forced to query the forum first, so they know what already exists before posting something new.
 
