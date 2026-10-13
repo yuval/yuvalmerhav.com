@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 440" font-family="Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#52525b"/>
+    </marker>
+  </defs>
+  <rect width="880" height="440" rx="12" fill="#ffffff"/>
+
+  <!-- LEFT: Meta-Harness -->
+  <text x="225" y="42" text-anchor="middle" font-size="19" font-weight="700" fill="#18181b">Meta-Harness</text>
+  <text x="225" y="62" text-anchor="middle" font-size="13" fill="#52525b">improve the harness code</text>
+
+  <g font-size="14" fill="#18181b" text-anchor="middle">
+    <rect x="50" y="80" width="310" height="50" rx="8" fill="#f4f4f5" stroke="#a1a1aa"/>
+    <text x="205" y="102" font-weight="700">Tasks with a verifier</text>
+    <text x="205" y="120" font-size="12" fill="#52525b">e.g. TerminalBench-2, math, classification</text>
+
+    <rect x="50" y="160" width="310" height="50" rx="8" fill="#f4f4f5" stroke="#a1a1aa"/>
+    <text x="205" y="182" font-weight="700">Harness + frozen model</text>
+    <text x="205" y="200" font-size="12" fill="#52525b">solves tasks, gets scored</text>
+
+    <rect x="50" y="240" width="310" height="50" rx="8" fill="#f4f4f5" stroke="#a1a1aa"/>
+    <text x="205" y="262" font-weight="700">Filesystem of all candidates</text>
+    <text x="205" y="280" font-size="12" fill="#52525b">source code, scores, full traces</text>
+
+    <rect x="50" y="320" width="310" height="50" rx="8" fill="#dbeafe" stroke="#3b82f6" stroke-width="2"/>
+    <text x="205" y="342" font-weight="700">Proposer (coding agent)</text>
+    <text x="205" y="360" font-size="12" fill="#1e40af">greps history, writes a new harness</text>
+  </g>
+
+  <g stroke="#52525b" stroke-width="1.6" fill="none" marker-end="url(#a)">
+    <line x1="205" y1="130" x2="205" y2="158"/>
+    <line x1="205" y1="210" x2="205" y2="238"/>
+    <line x1="205" y1="290" x2="205" y2="318"/>
+    <path d="M360,345 H395 V185 H362"/>
+  </g>
+  <text x="410" y="265" font-size="12" fill="#52525b" text-anchor="middle" transform="rotate(90 410 265)">new harness</text>
+
+  <text x="225" y="408" text-anchor="middle" font-size="14" fill="#18181b">What persists: <tspan font-weight="700" fill="#1e40af">the harness</tspan></text>
+
+  <line x1="440" y1="30" x2="440" y2="410" stroke="#e4e4e7" stroke-width="1.5"/>
+
+  <!-- RIGHT: Knowledge-Centric -->
+  <text x="655" y="42" text-anchor="middle" font-size="19" font-weight="700" fill="#18181b">Knowledge-Centric</text>
+  <text x="655" y="62" text-anchor="middle" font-size="13" fill="#52525b">improve a shared knowledge base</text>
+
+  <g font-size="14" fill="#18181b" text-anchor="middle">
+    <rect x="480" y="80" width="310" height="50" rx="8" fill="#f4f4f5" stroke="#a1a1aa"/>
+    <text x="635" y="102" font-weight="700">Pool of unsolved tasks</text>
+    <text x="635" y="120" font-size="12" fill="#52525b">solved tasks leave the pool</text>
+
+    <rect x="480" y="160" width="310" height="50" rx="8" fill="#f4f4f5" stroke="#a1a1aa"/>
+    <text x="635" y="182" font-weight="700">Fresh, disposable agent</text>
+    <text x="635" y="200" font-size="12" fill="#52525b">reads MEMORY.md, attempts one task</text>
+
+    <rect x="480" y="240" width="310" height="50" rx="8" fill="#f4f4f5" stroke="#a1a1aa"/>
+    <text x="635" y="262" font-weight="700">Forums</text>
+    <text x="635" y="280" font-size="12" fill="#52525b">per-task + cross-task posts, agree / disagree</text>
+
+    <rect x="480" y="320" width="310" height="50" rx="8" fill="#dbeafe" stroke="#3b82f6" stroke-width="2"/>
+    <text x="635" y="342" font-weight="700">Distillation → knowledge base</text>
+    <text x="635" y="360" font-size="12" fill="#1e40af">per-task + cross-task bundles</text>
+  </g>
+
+  <g stroke="#52525b" stroke-width="1.6" fill="none" marker-end="url(#a)">
+    <line x1="635" y1="130" x2="635" y2="158"/>
+    <line x1="635" y1="210" x2="635" y2="238"/>
+    <line x1="635" y1="290" x2="635" y2="318"/>
+    <path d="M790,345 H825 V185 H792"/>
+  </g>
+  <text x="840" y="265" font-size="12" fill="#52525b" text-anchor="middle" transform="rotate(90 840 265)">next generation</text>
+
+  <text x="655" y="408" text-anchor="middle" font-size="14" fill="#18181b">What persists: <tspan font-weight="700" fill="#1e40af">the knowledge</tspan></text>
+</svg>
