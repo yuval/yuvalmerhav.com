@@ -50,7 +50,7 @@ Each benchmark has a different setup, and it's important to follow each one to u
 
 #### Retrieval-augmented math
 
-Before solving a new math problem, it helps to show the model a few solved problems, but only if they're actually useful for the new one. In fact, they show that random few-shot hurts performance. Here the harness picks which solved examples, from a corpus of ~535K, to show the model before it tries a new olympiad problem. The search ran 40 iterations on 250 search-set problems with GPT-OSS-20B and produced 109 candidates. Evaluation is on 200 unseen IMO-level problems:
+Before solving a new math problem, it helps to show the model a few solved problems, but only if they're actually useful for the new one. In fact, they show that random few-shot hurts performance. Here the harness picks which solved examples, from a corpus of ~535K, to show the model before it tries a new olympiad problem. The proposer ran 40 iterations, producing 109 candidate harnesses, each scored by how well GPT-OSS-20B (the solver) did on 250 search-set problems. The best one was then evaluated on 200 unseen IMO-level problems, with GPT-OSS-20B plus four models not used during search:
 
 | Method | Avg over 5 models |
 |---|---|
