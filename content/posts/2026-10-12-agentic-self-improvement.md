@@ -60,7 +60,7 @@ Before solving a new olympiad problem, it helps to show the model a few similar 
 | Dense retrieval (k=5) | 38.1 |
 | Meta-Harness | 38.8 |
 
-The discovered harness guesses each problem's topic with keyword checks, then retrieves examples with BM25 using a slightly different rule per topic. The results aren't that exciting: it barely beats plain BM25 and dense retrieval. The authors' main argument is consistency - it improves over no retrieval on all five models, while dense retrieval and random few-shot hurt some of them.
+The discovered harness guesses each problem's topic with keyword checks, then retrieves examples with BM25 using a slightly different rule per topic. The results aren't that exciting: it slightly beats plain BM25 and dense retrieval. The authors' main argument is consistency - it improves over no retrieval on all five models, while dense retrieval and random few-shot hurt some of them.
 
 #### TerminalBench-2
 
