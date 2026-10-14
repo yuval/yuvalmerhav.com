@@ -52,7 +52,7 @@ Each benchmark has a different setup, and it's important to follow each one to u
 
 Before solving a new olympiad problem, it helps to show the model a few similar solved problems (random ones actually hurt). Here the harness decides which examples to pull from a corpus of ~535K. The search used GPT-OSS-20B as the solver, and the best harness was evaluated on 200 unseen IMO-level problems with GPT-OSS-20B plus four models not used during search.
 
-The discovered harness guesses each problem's topic with keyword checks, then retrieves examples with BM25 using a slightly different rule per topic. The results aren't that exciting: averaged over the five models, it scores 38.8 vs. 37.5 for plain BM25 and 38.1 for dense retrieval. The authors' main argument is consistency - it improves over no retrieval on all five models, while dense retrieval and random few-shot hurt some of them.
+The discovered harness guesses each problem's topic with keyword checks, then retrieves examples with BM25 using a slightly different rule per topic. The results aren't that exciting: averaged over the five models they evaluated, it scores 38.8 vs. 37.5 for plain BM25 and 38.1 for dense retrieval. The authors' main argument is consistency - it improves over no retrieval on all five models, while dense retrieval and random few-shot hurt some of them.
 
 #### TerminalBench-2
 
