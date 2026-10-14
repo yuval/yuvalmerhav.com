@@ -100,7 +100,7 @@ My take: the snapshot idea looks real and generic, but showing that it works on 
 Chelsea Finn also mentioned two follow-ups from her group. I haven't read them, so this is just my vague idea of what they do from the talk:
 
 - [WHALE](https://arxiv.org/abs/2609.00196) ([code](https://github.com/krafton-ai/WHALE)). Alternates between fine-tuning the agent's model weights and searching for better harness code, and this joint optimization beats optimizing either one alone on search QA, math, and chess tasks with small Qwen models.
-- [Librarian Agents](https://librarian-agents.github.io/) ([code](https://github.com/teresaz05/librarian-agents)). Uses RL to train a small "builder" model that reorganizes a document corpus ahead of time into a linked hierarchy of summaries pointing back to the sources, making future queries easier for a fixed answering agent.
+- [Librarian Agents](https://librarian-agents.github.io/). Uses RL to train a small "builder" model that reorganizes a document corpus ahead of time into a linked hierarchy of summaries pointing back to the sources, making future queries easier for a fixed answering agent.
 
 
 ## Knowledge-Centric Self-Improvement
