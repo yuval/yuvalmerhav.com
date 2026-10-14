@@ -100,7 +100,7 @@ My take: the snapshot idea looks real and generic, but showing that it works on 
 Chelsea Finn also mentioned two follow-ups from her group. I haven't read them, so this is just my vague idea of what they do from the talk:
 
 - [WHALE](https://arxiv.org/abs/2609.00196) ([code](https://github.com/krafton-ai/WHALE)). Optimizes the harness and the model weights together, alternating between fine-tuning the model under the current harness and running Meta-Harness under the updated model.
-- [Librarian Agents](https://librarian-agents.github.io/) ([code](https://github.com/teresaz05/librarian-agents)). Trains an agent with RL to organize a document corpus into a filesystem that other agents can then navigate, so here the filesystem itself is what gets learned.
+- [Librarian Agents](https://librarian-agents.github.io/) ([code](https://github.com/teresaz05/librarian-agents)). Uses RL to train a small "builder" model that reorganizes a document corpus ahead of time into a linked hierarchy of summaries pointing back to the sources, making future queries easier for a fixed answering agent.
 
 
 ## Knowledge-Centric Self-Improvement
